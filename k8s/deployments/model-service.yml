@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: model
+  labels:
+    service: model
+spec:
+  selector:
+    app: model
+  ports:
+  - port: 11000
+    targetPort: 11000

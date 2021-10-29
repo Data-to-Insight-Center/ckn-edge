@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  version: '0.1'
+  title: Imagenet Inference Server
+  description: Model Deployment Server
+
+paths:
+  /predict:
+    get:
+      tags:
+        - hello
+      operationId: model.predict
+      description: returns the predicted value
+      responses:
+        '200':
+          description: 'Success'
+
+servers:
+  - url: 'http://localhost'
