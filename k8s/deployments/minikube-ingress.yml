@@ -2,7 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: minikube-ingress
-  annotations:
 spec:
   rules:
   - host: tern.luddy.indiana.edu
@@ -14,4 +13,4 @@ spec:
           service:
             name: model
             port:
-              number: 11000
+              number: 31000

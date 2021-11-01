@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
       - name: model
-        image: ckn/model
-        imagePullPolicy: Never
+        image: swithana/ckn-edge-model:v0.2
+        ports:
+          - containerPort: 11000
       restartPolicy: Always

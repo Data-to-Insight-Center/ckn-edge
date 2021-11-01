@@ -7,6 +7,8 @@ metadata:
 spec:
   selector:
     app: model
+  type: NodePort
   ports:
   - port: 11000
     targetPort: 11000
+    nodePort: 31000

@@ -3,7 +3,7 @@ from flask import jsonify
 import connexion
 
 # Create the application instance
-app = connexion.App(__name__, specification_dir="/")
+app = connexion.App(__name__, specification_dir="./")
 
 
 # Read the yaml file to configure the endpoints
