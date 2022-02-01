@@ -63,13 +63,14 @@ class Server:
         results_df = pd.DataFrame()
         self.listen(num_clients, num_mc_runs)
         for run in range(num_mc_runs):
+            # retrieve the client constraints
             df = self.inform()
+            # sensitivity data - can be ignored - S
             qos_pred_data_df = pd.concat([qos_pred_data_df, df])
             Server.log(f"Running Monte-Carlo run ({run+1}/{num_mc_runs})")
             for alg_label, algorithm in protocol.STRATEGIES.items():
                 self.place(algorithm)
                 self.serve(alg_label)
-
         df = self.collect_results_data()
         results_df = pd.concat([results_df, df])
 
@@ -82,6 +83,7 @@ class Server:
         path = os.path.join(results_dir, f"{date.time()}.csv")
         results_df = results_df.reset_index()
         results_df.to_csv(path)
+        # client recorded summary
         Server.log(f"Results saved to '{path}'.")
 
         # Save the prediction data that can be used for sensitivity analysis w.r.t. QoS.
@@ -91,6 +93,7 @@ class Server:
         path = os.path.join(qos_pred_dir, f"{date.time()}.csv")
         qos_pred_data_df = qos_pred_data_df.reset_index()
         qos_pred_data_df.to_csv(path)
+        # coming from the server
         Server.log(f"QoS predictions saved to '{path}'.")
 
     # ================================================================================== #
@@ -99,7 +102,7 @@ class Server:
         self.clients, idx = {}, 0
         self.socketserver.bind(self.addr)
         self.socketserver.listen(5)
-        Server.log(f"Listening for connections from {num_clients} clients...")
+        Server.log(f"Listening for connections from {num_clients} clients... at: {self.addr}")
         while len(self.clients) < num_clients:
             conn, addr = self.socketserver.accept()
             name = pickle.loads(recv_msg(conn))
@@ -125,6 +128,7 @@ class Server:
             wait_sec (int, optional): Number of seconds to wait for ping packets.
                 Defaults to 1.
         """
+        # this I can ignore - S
         def ping_thread(client_id: int) -> None:
             """Helper function to gauge the communication strength to a client using ping.
 
@@ -212,6 +216,10 @@ class Server:
         # being computed against the actual delay.
         self.env = Environment(config=config)
         qos_pred_data = defaultdict(list)
+        #
+        # For each requst, each service calculate the accuracy and delay ...etc for each model available and return it
+        #
+        # you can ignore - S
         for u in self.env.requests:
             s = self.env.req_service(u)
             for m in self.env.models_for_service(s):

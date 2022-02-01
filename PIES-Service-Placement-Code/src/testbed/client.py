@@ -126,7 +126,7 @@ class Client:
 
     def connect(self) -> None:
         """Establish a connection with the (edge) server."""
-        Client.log("Preparing to connect...")
+        Client.log("Preparing to connect to {}:{}".format(self.hostname, self.portno))
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.hostname, self.portno))
         Client.log(f"Established connection with ({self.hostname}, {self.portno}).")
