@@ -8,7 +8,7 @@ class KafkaIngester:
     """
 
     def __init__(self, server_list, ckn_topic):
-        self.producer = KafkaProducer(bootstrap_servers=[server_list],
+        self.producer = KafkaProducer(bootstrap_servers=server_list,
                          value_serializer=lambda x: dumps(x).encode('utf-8'))
 
         self.topic = ckn_topic

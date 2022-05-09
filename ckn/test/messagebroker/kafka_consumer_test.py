@@ -6,7 +6,7 @@ class IngesterTester(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         server_list = ['172.27.29.200:9092']
-        topic = 'inference-events'
+        topic = 'inference-requests'
         cls._consumer = KafkaCKNConsumer(server_list, topic)
 
     @classmethod
