@@ -1,4 +1,4 @@
-from ckn.src.util.constants import INGEST_REQUEST_TO_GRAPH
+from ckn.src.util.constants import INGEST_REQUEST_TO_GRAPH, INGEST_PROCESSED_REQUEST_TO_GRAPH
 
 
 def create_graph_request(req_values, model_name, client_id):
@@ -24,9 +24,29 @@ def create_all_requests(values, model_id, client_id):
     return result
 
 
-def create_graph_request_from_json(request, graph_node_id, request_id):
+def create_graph_request_from_json(request, request_id):
     """
     Generates the graph request cypher query from a given JSON request from the consumer
+    Args:
+        request:
+        graph_node_id:
+        request_id:
+
+    Returns:
+    generated cypher insert query.
+    """
+    accuracy = request['accuracy']
+    delay = request['delay']
+    service_id = request['service_id']
+    client_id = request['client_id']
+
+    graph_request = INGEST_REQUEST_TO_GRAPH.format(service_id, client_id, accuracy, delay, service_id, request_id)
+    return graph_request
+
+
+def create_graph_request_from_processed_json(request, request_id):
+    """
+    Generates the graph request cypher query from a given JSON request from the processed dataset (with QoA QoD)
     Args:
         request:
         graph_node_id:
@@ -45,6 +65,6 @@ def create_graph_request_from_json(request, graph_node_id, request_id):
     service_id = request['service_id']
     client_id = request['client_id']
 
-    graph_request = INGEST_REQUEST_TO_GRAPH.format(graph_node_id, client_id, qos, qoa, qod, delay, delay_comm, delay_comp,
+    graph_request = INGEST_PROCESSED_REQUEST_TO_GRAPH.format(service_id, client_id, qos, qoa, qod, delay, delay_comm, delay_comp,
                                              model_id, service_id, request_id)
     return graph_request

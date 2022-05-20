@@ -4,11 +4,12 @@ from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 import threading
 from ckn.src.util.graph_scripter import create_graph_request_from_json
+from ckn.src.ingest.dbConnect import Database
 
 
-class KafkaCKNConsumer():
+class KafkaCKNConsumer:
 
-    def __init__(self, server_list, ckn_topic, poll_timeout=1.0, group_id='group-ckn'):
+    def __init__(self, server_list, ckn_topic, db_uri, db_user, db_pwd, poll_timeout=1.0, group_id='group-ckn'):
         self.topic = ckn_topic
         self.server_list = server_list
         self.group_id = group_id
@@ -26,6 +27,7 @@ class KafkaCKNConsumer():
             group_id=self.group_id,
             value_deserializer=lambda x: loads(x.decode('utf-8'))
         )
+        self.db = Database(db_uri, db_user, db_pwd)
 
     def consume(self):
         try:
@@ -45,8 +47,9 @@ class KafkaCKNConsumer():
             self.consumer.close()
 
     def process_message(self, message):
-        request = create_graph_request_from_json(message, "temp_node_id", 222)
-        print(request)
+        request = create_graph_request_from_json(message, 222)
+        self.db.run_cypher_query(request)
+        print("inserted cypher_query: ", request)
 
     def shutdown(self):
         self.running = False
