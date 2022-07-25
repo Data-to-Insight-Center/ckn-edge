@@ -3,7 +3,7 @@ import numpy as np
 from ckn.src.messagebroker.kafka_ingester import KafkaIngester
 import time
 import json
-import datetime
+from datetime import datetime
 import csv
 from numpy.random import default_rng
 from ckn.src.workload_generateor.util import generate_request, generate_stream_event_key
@@ -11,7 +11,8 @@ from ckn.src.workload_generateor.config import DEVICE_0, DEVICE_1, DEVICE_2, DEV
 
 
 def generate_events_for_device(device, random_generator):
-    now_time_millis = round(time.time() * 1000)
+    now = datetime.now()
+    now_datetime = now.strftime("%d-%m-%Y %H:%M:%S")
 
     # getting metadata
     device_name = device["name"]
@@ -31,7 +32,7 @@ def generate_events_for_device(device, random_generator):
 
     # generate service_1 events
     for i in range(service_1_events):
-        device_requests.append(generate_request(device_name, edge_server, service_1, acc, delay, now_time_millis))
+        device_requests.append(generate_request(device_name, edge_server, service_1, acc, delay, now_datetime))
         request_keys.append(generate_stream_event_key(device_name, service_1, edge_server))
 
     # generate service_2 events
@@ -56,12 +57,12 @@ def generate_baseline_load(random_generator):
     all_request_keys = [*device_0_event_keys, *device_1_event_keys, *device_2_event_keys, *device_3_event_keys, *device_4_event_keys]
     end_time = int(round(time.time() * 1000))
 
-    print(all_request_keys)
+    # print(all_request_keys)
     # writing to file
     # write_csv_file(all_window_events, "baseline_data.csv")
 
-    print("total_events: {}", len(all_window_events))
-    print("Total time: {}", str((end_time - start_time)/1000))
+    # print("total_events: {}", len(all_window_events))
+    # print("Total time: {}", str((end_time - start_time)/1000))
 
     return all_window_events, all_request_keys
 

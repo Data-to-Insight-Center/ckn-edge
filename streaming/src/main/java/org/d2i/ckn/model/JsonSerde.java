@@ -41,6 +41,4 @@ public class JsonSerde<T> implements Serde<T> {
     private T deserialize(byte[] bytes) {
         return OBJECT_MAPPER.readValue(bytes, type);
     }
-
-
 }

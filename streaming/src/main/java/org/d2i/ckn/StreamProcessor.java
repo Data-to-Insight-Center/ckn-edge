@@ -1,31 +1,33 @@
 package org.d2i.ckn;
 
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Produced;
-import org.d2i.ckn.model.InferenceEvent;
-import org.d2i.ckn.model.JsonSerde;
+import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.WindowStore;
+import org.d2i.ckn.model.*;
 
-import java.util.Locale;
+import java.time.Duration;
 import java.util.Properties;
 
 @Slf4j
 public class StreamProcessor {
 
-    private static String inputTopic = "inference-requests2";
+    private static String inputTopic = "inference-requests4";
     private static String outputTopic = "order-out";
+    private static String countSumStore = "count-sum-store";
 
     public static void main(String[] args) {
         Properties streamsProps = getProperties();
 
-        StreamsBuilder builder = getEdgeStreamsBuilder();
+//        StreamsBuilder builder = getEdgeStreamsBuilder();
+        StreamsBuilder builder = getWindowedAggregationBuilder();
 
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
 
@@ -34,17 +36,38 @@ public class StreamProcessor {
 
     private static StreamsBuilder getWindowedAggregationBuilder() {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
-        Serde<InferenceEvent> inferenceEvents = new JsonSerde<>(InferenceEvent.class);
+        Serde<InferenceEvent> inferenceEventSerde = new JsonSerde<>(InferenceEvent.class);
+        Serde<CountSumAggregator> countSumAggregatorSerde = new JsonSerde<>(CountSumAggregator.class);
+        Serde<AverageAggregator> averageAggregatorSerde = new JsonSerde<>(AverageAggregator.class);
 
-        KStream<String, Long> inferenceEventKStream = streamsBuilder.stream(inputTopic,
-                        Consumed.with(Serdes.String(), inferenceEvents))
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value.getClient_id() + "\taccuracy" + value.getAccuracy()))
-                .groupBy((key, value) -> value.getClient_id())
-                .count()
+        KStream<String, InferenceEvent> inferenceEventKStream = streamsBuilder.stream(inputTopic,
+                        Consumed.with(Serdes.String(), inferenceEventSerde)
+                                .withTimestampExtractor(new EventTimeExtractor()));
+
+        inferenceEventKStream.groupByKey()
+                .windowedBy(TimeWindows.of(Duration.ofSeconds(20L)).grace(Duration.ofSeconds(5)))
+                .aggregate(CountSumAggregator::new,
+                        (key, value, aggregate) -> aggregate.process(value),
+                        Materialized.<String, CountSumAggregator, WindowStore<Bytes, byte[]>>as(countSumStore)
+                                .withKeySerde(Serdes.String())
+                                .withValueSerde(countSumAggregatorSerde)
+                )
+                .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
                 .toStream()
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value));
+                .map((Windowed<String>winKey, CountSumAggregator value) -> {
+                    return new KeyValue<>(winKey.key(), process_average(value));
+                })
+                .peek((key, value) -> log.info("Outgoing record - key " +key +" value " + value))
+                .to(outputTopic, Produced.with(Serdes.String(), averageAggregatorSerde));
 
         return streamsBuilder;
+    }
+
+    private static AverageAggregator process_average(CountSumAggregator value){
+        long count = value.getCount();
+        float average_accuracy = value.getAccuracy_total()/count;
+        float average_delay = value.getDelay_total()/count;
+        return new AverageAggregator(average_accuracy, average_delay, count, value.getClient_id(), value.getService_id(), value.getServer_id(), System.currentTimeMillis());
     }
 
     private static StreamsBuilder getEdgeStreamsBuilder() {
@@ -53,8 +76,8 @@ public class StreamProcessor {
 
         KStream<String, Long> inferenceEventKStream = streamsBuilder.stream(inputTopic,
                         Consumed.with(Serdes.String(), inferenceEvents))
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value.getClient_id() + "\taccuracy" + value.getAccuracy()))
-                .groupBy((key, value) -> value.getClient_id())
+//                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value.getClient_id() + "\taccuracy" + value.getAccuracy()))
+                .groupByKey()
                 .count()
                 .toStream()
                 .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value));
@@ -63,9 +86,9 @@ public class StreamProcessor {
     }
 
     private static Properties getProperties() {
-        String groupId = "test-group-3";
+        String groupId = "ckn-group-5";
         String bootstrapServers = "localhost:9092";
-        String clientId = "java-test-client2";
+        String clientId = "java-test-client8";
 
         Properties configuration = new Properties();
         configuration.put(StreamsConfig.APPLICATION_ID_CONFIG, groupId);
