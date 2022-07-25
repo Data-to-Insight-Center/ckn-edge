@@ -45,7 +45,7 @@ class RandomRequestGenerator:
         return self._get_json_req(accuracy, delay, service_id, client_id, added_time)
 
     def _get_json_req(self, accuracy, delay, service_id, client_id, added_time):
-        return {'accuracy': accuracy, 'delay': delay, 'service_id': service_id, 'client_id': client_id, 'added_time': added_time}
+        return {'accuracy': accuracy, 'delay': delay, 'service_id': service_id, 'server_id': service_id, 'client_id': client_id, 'added_time': added_time}
 
     def _get_json_processed_req(self, qos, qoa, qod, delay, delay_comm, delay_comp, model_id, service_id, client_id):
         request = {'QoS': qos, 'QoA': qoa, 'QoD': qod, 'delay': delay, 'delay_comm': delay_comm,

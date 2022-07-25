@@ -2,8 +2,12 @@ import unittest
 from ckn.src.messagebroker.kafka_ingester import KafkaIngester
 from ckn.src.data_generator.random_data_gen import RandomRequestGenerator
 import time
-REQUESTS_PER_SECOND = 10000
-TOTAL_RUN_TIME = 10
+from numpy.random import default_rng
+
+from workload_generateor.baseline_generator import generate_baseline_load
+
+REQUESTS_PER_SECOND = 1
+TOTAL_RUN_TIME = 1
 THOUSAND_RPS_TIMEOUT = 0.9
 TENK_RPS_TIMEOUT = 0.1
 
@@ -11,7 +15,7 @@ class IngesterTester(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         server_list = 'localhost:9092'
-        topic = 'inference-requests'
+        topic = 'inference-requests2'
         cls._producer = KafkaIngester(server_list, topic)
         cls._randgen = RandomRequestGenerator()
 
@@ -21,8 +25,11 @@ class IngesterTester(unittest.TestCase):
         for j in range(TOTAL_RUN_TIME):
             start_time = time.time()
             for i in range(REQUESTS_PER_SECOND):
-                request = cls._randgen.generate_request(service_prefix="es_2_service")
-                cls._producer.send_request(request)
+                # request = cls._randgen.generate_request(service_prefix="es_2_service")
+                random_generator = default_rng()
+                events, keys = generate_baseline_load(random_generator)
+                for j in range(len(keys)):
+                    cls._producer.send_request(events[j], key=keys[j])
 
             time.sleep(TENK_RPS_TIMEOUT)
             total_time =  time.time() - start_time

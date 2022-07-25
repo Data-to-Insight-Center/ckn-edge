@@ -11,9 +11,9 @@ class IngesterTester(unittest.TestCase):
         #     configs.load(read_prop)
 
         server_list = ['localhost:9092']
-        topic = 'inference-requests'
+        topic = 'order-temp7'
         db_user = "neo4j"
-        db_uri = "bolt://172.28.96.1:11003"
+        db_uri = "bolt://localhost:7674"
         db_pwd = "root"
         consumer_threadpool_size = 10
         max_poll_records = 500
