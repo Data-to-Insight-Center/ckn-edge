@@ -3,7 +3,7 @@ from json import loads
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 from threading import current_thread
-from ckn.src.util.graph_scripter import create_graph_request_from_json
+from ckn.src.util.graph_scripter import create_graph_request_from_json, create_graph_request_aggregated_json
 from ckn.src.ingest.dbConnect import Database
 from concurrent.futures import ThreadPoolExecutor
 
@@ -31,8 +31,8 @@ class KafkaCKNConsumer:
             self.consumer.subscribe(self.topic)
             print("subscribing to topic ...")
             for message in self.consumer:
-                # self.executor.submit(self.process_message, message)
-                self.process_message(message.value)
+                self.executor.submit(self.process_message, message)
+                # self.process_message(message.value)
 
         finally:
             self.consumer.close()
@@ -42,7 +42,7 @@ class KafkaCKNConsumer:
             print("Message is none")
             exit()
         else:
-            request = create_graph_request_from_json(message.value, 222)
+            request = create_graph_request_aggregated_json(message.value, 222)
             # self.db.run_cypher_query(request)
             print("thread: {} \t inserted cypher_query: {}".format(current_thread().name, request))
 

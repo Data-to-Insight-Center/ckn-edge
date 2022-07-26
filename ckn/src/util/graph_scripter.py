@@ -1,4 +1,4 @@
-from ckn.src.util.constants import INGEST_REQUEST_TO_GRAPH, INGEST_PROCESSED_REQUEST_TO_GRAPH
+from ckn.src.util.constants import INGEST_REQUEST_TO_GRAPH, INGEST_PROCESSED_REQUEST_TO_GRAPH, INGEST_AGGR_REQUEST_TO_GRAPH
 
 
 def create_graph_request(req_values, model_name, client_id):
@@ -22,6 +22,29 @@ def create_all_requests(values, model_id, client_id):
     for i in range(values.shape[0]):
         result.append(create_graph_request(values[i], model_id, client_id))
     return result
+
+
+def create_graph_request_aggregated_json(request, request_id):
+    """
+    Generates the graph request cypher query from a given JSON request from the consumer for the aggregated events
+    Args:
+        request:
+        graph_node_id:
+        request_id:
+
+    Returns:
+    generated cypher insert query.
+    """
+    avg_accuracy = request['average_accuracy']
+    avg_delay = request['average_delay']
+    service_id = request['service_id']
+    client_id = request['client_id']
+    server_id = request['server_id']
+    window_time = request['timestamp']
+
+    graph_request = INGEST_AGGR_REQUEST_TO_GRAPH.format(server_id, client_id, avg_accuracy, avg_delay,
+                                                        service_id, window_time)
+    return graph_request
 
 
 def create_graph_request_from_json(request, request_id):

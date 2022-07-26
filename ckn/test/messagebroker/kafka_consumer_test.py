@@ -11,7 +11,7 @@ class IngesterTester(unittest.TestCase):
         #     configs.load(read_prop)
 
         server_list = ['localhost:9092']
-        topic = 'order-temp7'
+        topic = 'aggregated-events'
         db_user = "neo4j"
         db_uri = "bolt://localhost:7674"
         db_pwd = "root"
