@@ -9,28 +9,52 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.WindowStore;
 import org.d2i.ckn.model.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.Properties;
 
 @Slf4j
 public class StreamProcessor {
 
-    private static String inputTopic = "inference-requests4";
-    private static String outputTopic = "order-out";
-    private static String countSumStore = "count-sum-store";
-
+    private static String inputTopic;
+    private static String outputTopic;
+    private static String countSumStore;
+    private static String groupId;
+    private static String bootstrapServers;
+    private static String processorClientId;
     public static void main(String[] args) {
+        // load the configurations
+        try (InputStream input = StreamProcessor.class.getClassLoader().getResourceAsStream("config.properties")) {
+            Properties config = new Properties();
+            if (input == null) {
+                log.error("The configuration file could not be found!");
+                return;
+            }
+            config.load(input);
+
+            inputTopic = config.getProperty("stream.input.topic");
+            outputTopic = config.getProperty("stream.output.topic");
+            countSumStore = config.getProperty("stream.aggr.store");
+            groupId = config.getProperty("stream.group.id");
+            bootstrapServers = config.getProperty("stream.kafka.servers");
+            processorClientId = config.getProperty("stream.kafka.clientId");
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // setup Stream processing properties
         Properties streamsProps = getProperties();
 
-//        StreamsBuilder builder = getEdgeStreamsBuilder();
+        // building the stream processing topology
         StreamsBuilder builder = getWindowedAggregationBuilder();
 
+        // starting the stream processor
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
-
         kafkaStreams.start();
     }
 
@@ -44,6 +68,7 @@ public class StreamProcessor {
                         Consumed.with(Serdes.String(), inferenceEventSerde)
                                 .withTimestampExtractor(new EventTimeExtractor()));
 
+        // todo: tumbling or sliding window?
         inferenceEventKStream.groupByKey()
                 .windowedBy(TimeWindows.of(Duration.ofSeconds(20L)).grace(Duration.ofSeconds(5)))
                 .aggregate(CountSumAggregator::new,
@@ -86,13 +111,9 @@ public class StreamProcessor {
     }
 
     private static Properties getProperties() {
-        String groupId = "ckn-group-5";
-        String bootstrapServers = "localhost:9092";
-        String clientId = "java-test-client8";
-
         Properties configuration = new Properties();
         configuration.put(StreamsConfig.APPLICATION_ID_CONFIG, groupId);
-        configuration.put(StreamsConfig.CLIENT_ID_CONFIG, clientId);
+        configuration.put(StreamsConfig.CLIENT_ID_CONFIG, processorClientId);
         configuration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configuration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         configuration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
