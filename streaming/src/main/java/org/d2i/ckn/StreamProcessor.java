@@ -26,6 +26,8 @@ public class StreamProcessor {
     private static String groupId;
     private static String bootstrapServers;
     private static String processorClientId;
+    private static long timeWindowSize;
+    private static int windowGracePeriod;
     public static void main(String[] args) {
         // load the configurations
         try (InputStream input = StreamProcessor.class.getClassLoader().getResourceAsStream("config.properties")) {
@@ -42,6 +44,8 @@ public class StreamProcessor {
             groupId = config.getProperty("stream.group.id");
             bootstrapServers = config.getProperty("stream.kafka.servers");
             processorClientId = config.getProperty("stream.kafka.clientId");
+            timeWindowSize = Long.parseLong(config.getProperty("stream.kafka.windowSize"));
+            windowGracePeriod = Integer.parseInt(config.getProperty("stream.kafka.window.gracePeriod"));
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -70,7 +74,7 @@ public class StreamProcessor {
 
         // todo: tumbling or sliding window?
         inferenceEventKStream.groupByKey()
-                .windowedBy(TimeWindows.of(Duration.ofSeconds(20L)).grace(Duration.ofSeconds(5)))
+                .windowedBy(TimeWindows.of(Duration.ofSeconds(timeWindowSize)).grace(Duration.ofSeconds(windowGracePeriod)))
                 .aggregate(CountSumAggregator::new,
                         (key, value, aggregate) -> aggregate.process(value),
                         Materialized.<String, CountSumAggregator, WindowStore<Bytes, byte[]>>as(countSumStore)
