@@ -13,7 +13,7 @@ class IngesterTester(unittest.TestCase):
         server_list = ['localhost:9092']
         topic = 'aggregated-events'
         db_user = "neo4j"
-        db_uri = "bolt://localhost:7674"
+        db_uri = "bolt://localhost:7687"
         db_pwd = "root"
         consumer_threadpool_size = 10
         max_poll_records = 500
