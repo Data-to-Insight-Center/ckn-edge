@@ -8,31 +8,37 @@ import csv
 from numpy.random import default_rng
 from ckn.src.workload_generateor.util import generate_request, generate_stream_event_key
 from ckn.src.workload_generateor.config import DEVICE_0, DEVICE_1, DEVICE_2, DEVICE_3, DEVICE_4
+import numpy as np
 
 
 def generate_events_for_device(device, random_generator):
     now = datetime.now()
     now_datetime = now.strftime("%d-%m-%Y %H:%M:%S")
+    time_sec = now.second
 
     # getting metadata
     device_name = device["name"]
     edge_server = device["edge_server"]
     acc = device["acc"]
     delay = device["delay"]
+    std = device["std"]
+    sin_offset = device["sin_offset"]
 
     total_events = random_generator.poisson(device["total_lamda"])
     service_1 = device["service_1"]
     service_1_events = random_generator.poisson(device["ser_1_lambda"])
-    # service_2 = device["service_2"]
-    # service_2_events = random_generator.poisson(device["ser_2_lambda"])
+    total_events = int(np.floor(service_1_events * np.absolute(np.sin(time_sec + sin_offset))))
 
     # generating requests per device
     device_requests = []
     request_keys = []
 
     # generate service_1 events
-    for i in range(service_1_events):
-        device_requests.append(generate_request(device_name, edge_server, service_1, acc, delay, now_datetime))
+    for i in range(total_events):
+        # generating accuracy and delay using a normal distribution
+        normal_acc = np.clip(np.random.normal(acc, std), 0, 1).round(decimals=3)
+        normal_delay = np.clip(np.random.normal(delay, std), 0, 1).round(decimals=3)
+        device_requests.append(generate_request(device_name, edge_server, service_1, normal_acc, normal_delay, now_datetime))
         request_keys.append(generate_stream_event_key(device_name, service_1, edge_server))
 
     # generate service_2 events
@@ -40,7 +46,6 @@ def generate_events_for_device(device, random_generator):
     #     device_requests.append(generate_request(device_name, edge_server, service_2, acc, delay, now_time_millis))
 
     return device_requests, request_keys
-
 
 
 def generate_baseline_load(random_generator):
@@ -59,7 +64,7 @@ def generate_baseline_load(random_generator):
 
     # print(all_request_keys)
     # writing to file
-    # write_csv_file(all_window_events, "baseline_data.csv")
+    write_csv_file(all_window_events, "baseline_data.csv")
 
     # print("total_events: {}", len(all_window_events))
     # print("Total time: {}", str((end_time - start_time)/1000))
@@ -69,9 +74,9 @@ def generate_baseline_load(random_generator):
 
 def write_csv_file(data, filename):
     keys = data[0].keys()
-    with open(filename, "w") as file:
+    with open(filename, "a") as file:
         csvwriter = csv.DictWriter(file, keys)
-        csvwriter.writeheader()
+        # csvwriter.writeheader()
         csvwriter.writerows(data)
 
 def main():

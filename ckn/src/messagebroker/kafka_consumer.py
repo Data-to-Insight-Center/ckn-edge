@@ -43,7 +43,7 @@ class KafkaCKNConsumer:
             exit()
         else:
             request = create_graph_request_aggregated_json(message.value, 222)
-            # self.db.run_cypher_query(request)
+            self.db.run_cypher_query(request)
             print("thread: {} \t inserted cypher_query: {}".format(current_thread().name, request))
 
     def shutdown(self):

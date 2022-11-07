@@ -7,15 +7,15 @@ from numpy.random import default_rng
 from workload_generateor.baseline_generator import generate_baseline_load
 
 REQUESTS_PER_SECOND = 1
-TOTAL_RUN_TIME = 10
+TOTAL_RUN_TIME = 1000
 THOUSAND_RPS_TIMEOUT = 0.9
-TENK_RPS_TIMEOUT = 0.9
+TENK_RPS_TIMEOUT = 1
 
 class IngesterTester(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         server_list = 'localhost:9092'
-        topic = 'inference-requests4'
+        topic = 'inference-requests8'
         cls._producer = KafkaIngester(server_list, topic)
         cls._randgen = RandomRequestGenerator()
 
@@ -28,12 +28,13 @@ class IngesterTester(unittest.TestCase):
                 # request = cls._randgen.generate_request(service_prefix="es_2_service")
                 random_generator = default_rng()
                 events, keys = generate_baseline_load(random_generator)
-                print(events[0])
-                for j in range(len(keys)):
-                    cls._producer.send_request(events[j], key=keys[j])
+                print('Step: {0} completed.'.format(j))
+
+                # for k in range(len(keys)):
+                #     cls._producer.send_request(events[j], key=keys[j])
 
             time.sleep(TENK_RPS_TIMEOUT)
-            total_time =  time.time() - start_time
+            total_time = time.time() - start_time
             total_run_time += total_time
             print("done sending events... Total time: ", total_time)
         print("avg time: ", total_run_time/10)

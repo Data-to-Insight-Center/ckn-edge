@@ -14,7 +14,7 @@ class IngesterTester(unittest.TestCase):
         topic = 'aggregated-events'
         db_user = "neo4j"
         db_uri = "bolt://localhost:7687"
-        db_pwd = "root"
+        db_pwd = "rootroot"
         consumer_threadpool_size = 10
         max_poll_records = 500
         cls._consumer = KafkaCKNConsumer(server_list, topic, db_uri, db_user, db_pwd, consumer_threadpool_size, max_poll_records)

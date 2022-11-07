@@ -14,11 +14,19 @@ RASPI_1_SERVER = ["EDGE-1"]
 RASPI_2_SERVER = ["EDGE-1"]
 RASPI_3_SERVER = ["EDGE-2"]
 RASPI_4_SERVER = ["EDGE-2"]
-RASPI_5_SERVER = ["EDGE-2"]
+RASPI_5_SERVER = ["EDGE-3"]
+
+# # poision distribution lambda, class_1_lamda, class_2_lambda, device_acc, device_delay
+# DEVICE_0 = {"name": DEVICES[0], "edge_server": RASPI_1_SERVER[0], "service_1": RASPI_1[0], "service_2": RASPI_1[1], "total_lamda": 100, "ser_1_lambda": 50, "ser_2_lambda": 50, "acc": 0.90, "delay": 0.4}
+# DEVICE_1 = {"name": DEVICES[1], "edge_server": RASPI_2_SERVER[0], "service_1": RASPI_2[0], "service_2": RASPI_2[1], "total_lamda": 300, "ser_1_lambda": 150, "ser_2_lambda": 150, "acc": 0.70, "delay": 0.6}
+# DEVICE_2 = {"name": DEVICES[2], "edge_server": RASPI_3_SERVER[0], "service_1": RASPI_3[0], "service_2": RASPI_3[1], "total_lamda": 400, "ser_1_lambda": 100, "ser_2_lambda": 300, "acc": 0.60, "delay": 0.5}
+# DEVICE_3 = {"name": DEVICES[3], "edge_server": RASPI_4_SERVER[0], "service_1": RASPI_4[0], "service_2": RASPI_4[1], "total_lamda": 50, "ser_1_lambda": 40, "ser_2_lambda": 10, "acc": 0.60, "delay": 0.8}
+# DEVICE_4 = {"name": DEVICES[4], "edge_server": RASPI_5_SERVER[0], "service_1": RASPI_5[0], "service_2": RASPI_5[1], "total_lamda": 150, "ser_1_lambda": 100, "ser_2_lambda": 100, "acc": 0.90, "delay": 0.3}
+
 
 # poision distribution lambda, class_1_lamda, class_2_lambda, device_acc, device_delay
-DEVICE_0 = {"name": DEVICES[0], "edge_server": RASPI_1_SERVER[0], "service_1": RASPI_1[0], "service_2": RASPI_1[1], "total_lamda": 100, "ser_1_lambda": 50, "ser_2_lambda": 50, "acc": 0.90, "delay": 0.4}
-DEVICE_1 = {"name": DEVICES[1], "edge_server": RASPI_2_SERVER[0], "service_1": RASPI_2[0], "service_2": RASPI_2[1], "total_lamda": 300, "ser_1_lambda": 150, "ser_2_lambda": 150, "acc": 0.70, "delay": 0.6}
-DEVICE_2 = {"name": DEVICES[2], "edge_server": RASPI_3_SERVER[0], "service_1": RASPI_3[0], "service_2": RASPI_3[1], "total_lamda": 400, "ser_1_lambda": 100, "ser_2_lambda": 300, "acc": 0.60, "delay": 0.5}
-DEVICE_3 = {"name": DEVICES[3], "edge_server": RASPI_4_SERVER[0], "service_1": RASPI_4[0], "service_2": RASPI_4[1], "total_lamda": 50, "ser_1_lambda": 40, "ser_2_lambda": 10, "acc": 0.60, "delay": 0.8}
-DEVICE_4 = {"name": DEVICES[4], "edge_server": RASPI_5_SERVER[0], "service_1": RASPI_5[0], "service_2": RASPI_5[1], "total_lamda": 150, "ser_1_lambda": 100, "ser_2_lambda": 100, "acc": 0.90, "delay": 0.3}
+DEVICE_0 = {"name": DEVICES[0], "edge_server": RASPI_1_SERVER[0], "service_1": RASPI_1[0], "service_2": RASPI_1[0], "total_lamda": 100, "ser_1_lambda": 50, "ser_2_lambda": 50, "acc": 0.85, "delay": 0.8, "std": 0.001, "sin_offset": 0}
+DEVICE_1 = {"name": DEVICES[1], "edge_server": RASPI_2_SERVER[0], "service_1": RASPI_1[0], "service_2": RASPI_1[0], "total_lamda": 300, "ser_1_lambda": 150, "ser_2_lambda": 150, "acc": 0.70, "delay": 0.7, "std": 0.05, "sin_offset": 1}
+DEVICE_2 = {"name": DEVICES[2], "edge_server": RASPI_3_SERVER[0], "service_1": RASPI_1[0], "service_2": RASPI_1[0], "total_lamda": 400, "ser_1_lambda": 100, "ser_2_lambda": 300, "acc": 0.60, "delay": 0.5, "std": 0.05, "sin_offset": 0.5}
+DEVICE_3 = {"name": DEVICES[3], "edge_server": RASPI_4_SERVER[0], "service_1": RASPI_1[0], "service_2": RASPI_1[0], "total_lamda": 50, "ser_1_lambda": 40, "ser_2_lambda": 10, "acc": 0.50, "delay": 0.3, "std": 0.1, "sin_offset": 2}
+DEVICE_4 = {"name": DEVICES[4], "edge_server": RASPI_5_SERVER[0], "service_1": RASPI_1[0], "service_2": RASPI_1[0], "total_lamda": 150, "ser_1_lambda": 100, "ser_2_lambda": 100, "acc": 0.80, "delay": 0.4, "std": 0.03, "sin_offset": 0.25}
