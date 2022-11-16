@@ -1,6 +1,6 @@
 import numpy as np
 
-from ckn.src.messagebroker.kafka_ingester import KafkaIngester
+# from ckn.src.messagebroker.kafka_ingester import KafkaIngester
 import time
 import json
 from datetime import datetime
@@ -37,7 +37,7 @@ def generate_events_for_device(device, random_generator):
     for i in range(total_events):
         # generating accuracy and delay using a normal distribution
         normal_acc = np.clip(np.random.normal(acc, std), 0, 1).round(decimals=3)
-        normal_delay = np.clip(np.random.normal(delay, std), 0, 1).round(decimals=3)
+        normal_delay = np.clip(np.random.normal(delay, std), 0.005, 1).round(decimals=3)
         device_requests.append(generate_request(device_name, edge_server, service_1, normal_acc, normal_delay, now_datetime))
         request_keys.append(generate_stream_event_key(device_name, service_1, edge_server))
 
@@ -64,7 +64,7 @@ def generate_baseline_load(random_generator):
 
     # print(all_request_keys)
     # writing to file
-    write_csv_file(all_window_events, "baseline_data.csv")
+    write_csv_file(all_window_events, "baseline_data_low_delay.csv")
 
     # print("total_events: {}", len(all_window_events))
     # print("Total time: {}", str((end_time - start_time)/1000))
@@ -79,28 +79,28 @@ def write_csv_file(data, filename):
         # csvwriter.writeheader()
         csvwriter.writerows(data)
 
-def main():
-    # used to generate the distributions
-    random_generator = default_rng()
-
-    # Kafka initiation
-    server_list = 'localhost:9092'
-    topic = 'inference-requests'
-    producer = KafkaIngester(server_list, topic)
-
-    start_time = time.time()
-    total_run_time = 0.0
-
-    for i in range(1):
-        events, keys = generate_baseline_load(random_generator)
-        # for j in range(len(keys)):
-        for j in range(3):
-            print(events[j])
-            print(keys[j])
-            producer.send_request(events[j])
-        total_time = time.time() - start_time
-        total_run_time += total_time
-        print("done sending events... Total time: ", total_time)
+# def main():
+#     # used to generate the distributions
+#     random_generator = default_rng()
+#
+#     # Kafka initiation
+#     server_list = 'localhost:9092'
+#     topic = 'inference-requests'
+#     producer = KafkaIngester(server_list, topic)
+#
+#     start_time = time.time()
+#     total_run_time = 0.0
+#
+#     for i in range(1):
+#         events, keys = generate_baseline_load(random_generator)
+#         # for j in range(len(keys)):
+#         for j in range(3):
+#             print(events[j])
+#             print(keys[j])
+#             producer.send_request(events[j])
+#         total_time = time.time() - start_time
+#         total_run_time += total_time
+#         print("done sending events... Total time: ", total_time)
 
 
 if __name__ == "__main__":

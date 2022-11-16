@@ -4,9 +4,9 @@ import csv
 import numpy as np
 import os
 
-URL = "http://localhost:11000/predict"
-DEVICE_NAME = "raspi-1"
-DATA_FILE = './data/baseline_data.csv'
+URL = "http://localhost:8080/qoe_predict"
+DEVICE_NAME = "raspi-3"
+DATA_FILE = 'data/baseline_data_low_delay.csv'
 IMAGE_DIRECTORY = './data/images'
 IMAGES = []
 
@@ -115,8 +115,9 @@ def main():
     # get the input images
     images_raspi_1, image_paths = get_images_in_order(IMAGE_DIRECTORY, DEVICE_NAME)
 
-    index = 0
-    response, time = send_request(images_raspi_1[index], image_paths[index], json_requests[index])
+    for index in range(1000):
+        # index = 0
+        response, time = send_request(images_raspi_1[index], image_paths[index], json_requests[index])
     print(response.text)
     print("Total time: {}ms".format(round(time, 2)))
 

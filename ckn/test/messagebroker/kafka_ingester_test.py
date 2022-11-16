@@ -1,5 +1,5 @@
 import unittest
-from ckn.src.messagebroker.kafka_ingester import KafkaIngester
+# from ckn.src.messagebroker.kafka_ingester import KafkaIngester
 from ckn.src.data_generator.random_data_gen import RandomRequestGenerator
 import time
 from numpy.random import default_rng
@@ -16,7 +16,7 @@ class IngesterTester(unittest.TestCase):
     def setUpClass(cls):
         server_list = 'localhost:9092'
         topic = 'inference-requests8'
-        cls._producer = KafkaIngester(server_list, topic)
+        # cls._producer = KafkaIngester(server_list, topic)
         cls._randgen = RandomRequestGenerator()
 
     @classmethod
@@ -33,7 +33,7 @@ class IngesterTester(unittest.TestCase):
                 # for k in range(len(keys)):
                 #     cls._producer.send_request(events[j], key=keys[j])
 
-            time.sleep(TENK_RPS_TIMEOUT)
+            # time.sleep(TENK_RPS_TIMEOUT)
             total_time = time.time() - start_time
             total_run_time += total_time
             print("done sending events... Total time: ", total_time)
