@@ -2,6 +2,7 @@ from datetime import datetime
 from json import dumps
 from kafka import KafkaProducer
 
+
 class KafkaIngester:
     """
     Library class for ingesting information into CKN through Kafka.
@@ -18,3 +19,9 @@ class KafkaIngester:
         Sends requests to CKN
         """
         self.producer.send(topic=self.topic, value=request, key=key.encode())
+
+    def send_qoe(self, request):
+        """
+        Sends QoE events to CKN
+        """
+        self.producer.send(topic=self.topic, value=request)

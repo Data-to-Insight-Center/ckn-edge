@@ -29,7 +29,7 @@ class KafkaCKNConsumer:
     def consume(self):
         try:
             self.consumer.subscribe(self.topic)
-            print("subscribing to topic ...")
+            print("subscribing to topic: {}".format(self.topic))
             for message in self.consumer:
                 self.executor.submit(self.process_message, message)
                 # self.process_message(message.value)
