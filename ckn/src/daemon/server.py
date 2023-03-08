@@ -1,10 +1,10 @@
 import time
 
-from ckn.src.messagebroker.kafka_ingester import KafkaIngester
+# from ckn.src.messagebroker.kafka_ingester import KafkaIngester
 from flask import Flask, flash, request, redirect, url_for, jsonify
 import connexion
 import os
-from model import predict, pre_process
+from model import predict, pre_process, load_model
 import numpy as np
 import csv
 
@@ -24,7 +24,7 @@ app.config['SECRET_KEY'] = "ckn-edge-ai"
 
 server_list = 'localhost:9092'
 topic = 'qoe-events-test'
-producer = KafkaIngester(server_list, topic)
+# producer = KafkaIngester(server_list, topic)
 
 
 @app.route("/")
@@ -34,6 +34,16 @@ def home():
     :return:
     """
     return "Welcome to the SqueezeNet containerized REST server!"
+
+
+@app.route("/load/", methods=['GET'])
+def deploy_model():
+    """
+    Loads a given model in the system.
+    """
+    model_name = request.args['model_name']
+    load_model(model_name)
+    return "Model Loaded " + str(model_name)
 
 
 def check_file_extension(filename):
@@ -124,7 +134,7 @@ def process_w_qoe(file, data):
     # filename = './QoE_MobileNetV2.csv'
     # filename = './QoE_MobileNet_Dogs.csv'
     # filename = './QoE_MobileNet_low_delay.csv'
-    filename = './QoE_MobileNet_raspi-3.csv'
+    filename = './QoE_squeezenet_total.csv'
     # filename = './QoE_GoogleNet.csv'
     # filename = './QoE_ResNet.csv'
     write_csv_file([qoe_event], filename)
@@ -139,7 +149,7 @@ def send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe
     qoe_event = {'server_id': data['server_id'], 'service_id': data['service_id'], 'client_id': data['client_id'],
                  'prediction': prediction, "compute_time": compute_time, "pred_acc": probability, 'QoE': qoe,
                  'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe, 'req_acc': req_acc, 'req_delay': req_delay, 'added_time': data['added_time']}
-    producer.send_qoe(qoe_event)
+    # producer.send_qoe(qoe_event)
     return qoe_event
 
 
@@ -184,7 +194,7 @@ def calculate_delay_qoe(req_delay, provided_delay):
     :return:
     """
     # dxy = np.abs(req_delay-provided_delay)/np.max((req_delay, provided_delay))
-    return min(1.0, req_delay/provided_delay)
+    return min(1.0, provided_delay/req_delay)
 
 
 def similarity(x, y):

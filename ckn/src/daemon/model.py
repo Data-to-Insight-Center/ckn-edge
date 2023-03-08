@@ -9,10 +9,16 @@ from torchvision import models
 # model = torch.hub.load('pytorch/vision:v0.10.0', 'googlenet', pretrained=True)
 # model = torch.hub.load('pytorch/vision:v0.10.0', 'densenet121', pretrained=True)
 # model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained=True)
-model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=True)
-# model = torch.hub.load('pytorch/vision:v0.10.0', 'squeezenet1_0', pretrained=True)
+# model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v2', pretrained=True)
+model = torch.hub.load('pytorch/vision:v0.10.0', 'squeezenet1_0', pretrained=True)
 
 model.eval()
+
+
+def load_model(model_name):
+    model = torch.hub.load('pytorch/vision:v0.10.0', model_name, pretrained=True)
+    model.eval()
+
 
 # retrieving the class label
 with open("imagenet_classes.txt", "r") as f:

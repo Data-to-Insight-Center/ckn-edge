@@ -3,10 +3,15 @@ import datetime
 import csv
 import numpy as np
 import os
+"""
+This generates the REST requests along with the images to be sent to the EDGE REST interfaces. 
+"""
+
+
 
 URL = "http://localhost:8080/qoe_predict"
 DEVICE_NAME = "raspi-3"
-DATA_FILE = 'data/baseline_data_low_delay.csv'
+DATA_FILE = 'data/baseline_data_1device_1min.csv'
 IMAGE_DIRECTORY = './data/images'
 IMAGES = []
 
@@ -58,7 +63,8 @@ def get_device_data(data, device_name):
     Returns:
 
     """
-    return data[np.where(data[:, 4] == device_name)]
+    return data
+    # return data[np.where(data[:, 4] == device_name)]
 
 
 def get_json_requests(dataset):
@@ -115,11 +121,18 @@ def main():
     # get the input images
     images_raspi_1, image_paths = get_images_in_order(IMAGE_DIRECTORY, DEVICE_NAME)
 
-    for index in range(1000):
-        # index = 0
-        response, time = send_request(images_raspi_1[index], image_paths[index], json_requests[index])
-    print(response.text)
-    print("Total time: {}ms".format(round(time, 2)))
+    TOTAL_REQUESTS = 250000
+    DISTINCT_IMAGES = 2000
+    # max_iterations = int(TOTAL_REQUESTS/DISTINCT_IMAGES)
+    max_iterations = 3
+
+    for i in range(max_iterations):
+        for img_index in range(DISTINCT_IMAGES):
+            request_index = DISTINCT_IMAGES*i + img_index
+            response, time = send_request(images_raspi_1[img_index], image_paths[img_index], json_requests[request_index])
+        print("{0} requests sent!".format(request_index + 1))
+        print(response.text)
+        # print("Total time: {}ms".format(round(time, 2)))
 
 
 if __name__ == "__main__":
