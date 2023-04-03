@@ -3,15 +3,15 @@ import datetime
 import csv
 import numpy as np
 import os
+import time
 """
 This generates the REST requests along with the images to be sent to the EDGE REST interfaces. 
 """
 
-
-
 URL = "http://localhost:8080/qoe_predict"
+SIGNAL_URL = "http://localhost:8080/changetimestep"
 DEVICE_NAME = "raspi-3"
-DATA_FILE = 'data/baseline_data_1device_1min.csv'
+DATA_FILE = 'data/1_min_window_low_delay_high_rps.csv'
 IMAGE_DIRECTORY = './data/images'
 IMAGES = []
 
@@ -91,9 +91,6 @@ def send_request(filename, file_location, payload):
     Returns:
 
     """
-    print(filename)
-    print(file_location)
-    print(payload)
     start_time = datetime.datetime.now().microsecond/1000
     files = [
         ('file',
@@ -107,6 +104,39 @@ def send_request(filename, file_location, payload):
     return response, total_time
 
 
+def signal_split_end():
+    """
+    Generates the POST request for the given set of parameters and sends it
+    Args:
+        filename:
+        file_location:
+
+    Returns:
+
+    """
+    headers = {}
+
+    response = requests.request("GET", SIGNAL_URL, headers=headers)
+
+    return response
+
+
+def split_data_by_timestamp(data):
+    timestamp = data[0][-1]
+    split_data = []
+    single_split = []
+    for row in data:
+        if row[-1] == timestamp:
+            single_split.append(row)
+        else:
+            split_data.append(single_split)
+            single_split = []
+            single_split.append(row)
+            timestamp = row[-1]
+    split_data.append(single_split)
+    return split_data
+
+
 def main():
     """
     Run the generator for a given device
@@ -116,7 +146,12 @@ def main():
     # get the device input data
     data_file = parse_data_file(DATA_FILE)
     device_data = get_device_data(data_file, DEVICE_NAME)
-    json_requests = get_json_requests(device_data)
+    # split data by timestamp
+    split_data = split_data_by_timestamp(device_data)
+
+    # convert to json requests
+    # json_requests = get_json_requests(device_data)
+
 
     # get the input images
     images_raspi_1, image_paths = get_images_in_order(IMAGE_DIRECTORY, DEVICE_NAME)
@@ -124,13 +159,31 @@ def main():
     TOTAL_REQUESTS = 250000
     DISTINCT_IMAGES = 2000
     # max_iterations = int(TOTAL_REQUESTS/DISTINCT_IMAGES)
-    max_iterations = 3
+    max_iterations = 1
+
+    # for i in range(max_iterations):
+    #     for img_index in range(DISTINCT_IMAGES):
+    #         request_index = DISTINCT_IMAGES*i + img_index
+    #         response, time = send_request(images_raspi_1[img_index], image_paths[img_index], json_requests[request_index])
+    #     print("{0} requests sent!".format(request_index + 1))
+    #     print(response.text)
+    #     # print("Total time: {}ms".format(round(time, 2)))
 
     for i in range(max_iterations):
-        for img_index in range(DISTINCT_IMAGES):
-            request_index = DISTINCT_IMAGES*i + img_index
-            response, time = send_request(images_raspi_1[img_index], image_paths[img_index], json_requests[request_index])
-        print("{0} requests sent!".format(request_index + 1))
+        # each split contains single time frame data
+        for split_idx in range(len(split_data)):
+            # convert each split to json requests
+            json_requests = get_json_requests(np.asarray(split_data[split_idx]))
+
+            # send each request along wih an image from the IMAGENET data
+            for k in range(json_requests.shape[0]):
+                response, r_time = send_request(images_raspi_1[k], image_paths[k], json_requests[k])
+
+            print("Signaling split end after {} requests!".format(len(split_data[split_idx])))
+            signal_split_end()
+            time.sleep(5)
+
+        print("{0} rounds sent!".format(i + 1))
         print(response.text)
         # print("Total time: {}ms".format(round(time, 2)))
 

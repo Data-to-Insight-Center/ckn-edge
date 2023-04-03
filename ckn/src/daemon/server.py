@@ -1,6 +1,7 @@
 import time
 
 # from ckn.src.messagebroker.kafka_ingester import KafkaIngester
+from ckn.src.daemon.controller import random_placement, optimal_placement
 from flask import Flask, flash, request, redirect, url_for, jsonify
 import connexion
 import os
@@ -27,6 +28,16 @@ topic = 'qoe-events-test'
 # producer = KafkaIngester(server_list, topic)
 
 
+class Window:
+    total_acc = 0
+    total_delay = 0
+    num_requests = 0
+    model_name = 'SqueezeNet'
+
+
+window = Window()
+
+
 @app.route("/")
 def home():
     """
@@ -43,7 +54,36 @@ def deploy_model():
     """
     model_name = request.args['model_name']
     load_model(model_name)
+    window.model_name = model_name
     return "Model Loaded " + str(model_name)
+
+
+@app.route("/changetimestep/", methods=['GET'])
+def changeTimestep():
+    """
+    Run the changing of the model evaluation
+    Returns:
+
+    """
+    avg_acc = window.total_acc/window.num_requests
+    avg_delay = window.total_delay/window.num_requests
+
+    print("Avg Acc: {}\tAvg Delay: {}\tTotal requests: {}".format(avg_acc, avg_delay, window.num_requests))
+
+    # changing the model
+
+    # new_model = random_placement()
+    new_model = optimal_placement(avg_acc, avg_delay)
+
+    load_model(new_model)
+    window.model_name = new_model
+    print("Model Loaded " + str(new_model))
+
+    # resetting the values
+    window.total_acc = 0
+    window.total_delay = 0
+    window.num_requests = 0
+    return 'OK'
 
 
 def check_file_extension(filename):
@@ -125,8 +165,12 @@ def process_w_qoe(file, data):
 
     qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, req_delay, req_acc)
 
-    result = {'prediction': prediction, "compute_time": compute_time, "probability": probability, 'QoE': qoe, 'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe}
-    qoe_event = send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe)
+    result = {'prediction': prediction, "compute_time": compute_time, "probability": probability, 'QoE': qoe, 'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe, 'model': window.model_name}
+    qoe_event = send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe, window.model_name)
+
+    window.total_acc += req_acc
+    window.total_delay += req_delay
+    window.num_requests += 1
 
     # filename = './QoE_SqueezeNet.csv'
     # filename = './QoE_DenseNet.csv'
@@ -134,7 +178,7 @@ def process_w_qoe(file, data):
     # filename = './QoE_MobileNetV2.csv'
     # filename = './QoE_MobileNet_Dogs.csv'
     # filename = './QoE_MobileNet_low_delay.csv'
-    filename = './QoE_squeezenet_total.csv'
+    filename = './QoE_optimal.csv'
     # filename = './QoE_GoogleNet.csv'
     # filename = './QoE_ResNet.csv'
     write_csv_file([qoe_event], filename)
@@ -142,19 +186,20 @@ def process_w_qoe(file, data):
     return jsonify(result)
 
 
-def send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe):
+def send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe, model_name):
     req_acc = float(data['accuracy'])
     req_delay = float(data['delay'])
 
     qoe_event = {'server_id': data['server_id'], 'service_id': data['service_id'], 'client_id': data['client_id'],
                  'prediction': prediction, "compute_time": compute_time, "pred_acc": probability, 'QoE': qoe,
-                 'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe, 'req_acc': req_acc, 'req_delay': req_delay, 'added_time': data['added_time']}
+                 'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe, 'req_acc': req_acc, 'req_delay': req_delay,
+                 'model': model_name, 'added_time': data['added_time']}
     # producer.send_qoe(qoe_event)
     return qoe_event
 
 
 def write_csv_file(data, filename):
-    csv_columns = ['server_id', 'service_id', 'client_id', 'prediction', 'compute_time', 'pred_acc', 'QoE', 'Acc_QoE', 'Delay_QoE', 'req_acc', 'req_delay', 'added_time']
+    csv_columns = ['server_id', 'service_id', 'client_id', 'prediction', 'compute_time', 'pred_acc', 'QoE', 'Acc_QoE', 'Delay_QoE', 'req_acc', 'req_delay', 'model', 'added_time']
     with open(filename, "a") as file:
         csvwriter = csv.DictWriter(file, csv_columns)
         # csvwriter.writeheader()
@@ -194,7 +239,7 @@ def calculate_delay_qoe(req_delay, provided_delay):
     :return:
     """
     # dxy = np.abs(req_delay-provided_delay)/np.max((req_delay, provided_delay))
-    return min(1.0, provided_delay/req_delay)
+    return min(1.0, req_delay/provided_delay)
 
 
 def similarity(x, y):
@@ -247,4 +292,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=False)

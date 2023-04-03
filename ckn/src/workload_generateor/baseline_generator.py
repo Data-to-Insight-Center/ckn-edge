@@ -26,7 +26,8 @@ def generate_events_for_device(device, random_generator, current_time):
     total_events = random_generator.poisson(device["total_lamda"])
     service_1 = device["service_1"]
     service_1_events = random_generator.poisson(device["ser_1_lambda"])
-    total_events = int(np.floor(service_1_events * np.absolute(np.sin(time_sec + sin_offset))))
+    # total_events = int(np.floor(service_1_events * np.absolute(np.sin(time_sec + sin_offset))))
+    total_events = int(service_1_events)
 
     # generating requests per device
     device_requests = []
@@ -63,7 +64,7 @@ def generate_baseline_load(random_generator, current_time):
     # time.sleep(0.99)
     # print(all_request_keys)
     # writing to file
-    write_csv_file(all_window_events, "baseline_data_1device_1min.csv")
+    write_csv_file(all_window_events, "baseline_data_1device_1min_new_delay.csv")
 
     # print("total_events: {}", len(all_window_events))
     # print("Total time: {}", str((end_time - start_time)/1000))
