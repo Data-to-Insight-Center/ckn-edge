@@ -1,7 +1,12 @@
 import numpy as np
+import joblib
+import tensorflow as tf
 from ckn.src.daemon.constants import MODEL_EVALUATIONS, DEVICE_ACC_AVG, DEVICE_DELAY_AVG
 
 MODEL_NAMES = ['resnet18', 'googlenet', 'densenet121', 'alexnet', 'mobilenet_v2', 'squeezenet1_0']
+
+# two_in_one_out_model = joblib.load("./models/2WindIn_1Out_model.pkl")
+two_in_one_out_model = tf.keras.models.load_model("./models/model.h5")
 
 
 def random_placement():
@@ -30,6 +35,29 @@ def optimal_placement(prev_acc, prev_delay):
     next_delay = float(DEVICE_DELAY_AVG[next_index])
     optimal_model = placement(next_acc, next_delay)
     return optimal_model
+
+
+def predictive_placement(prev_window, current_window):
+    """
+    Given the previous time series data, predicts the future timeframe
+    Args:
+        prev_window:
+        current_window:
+
+    Returns:
+
+    """
+    # creating the time window
+    timeseries_window = np.asarray([prev_window.avg_acc, prev_window.avg_delay, current_window.avg_acc, current_window.avg_delay])
+
+    # predicting the next time window
+    prediction = two_in_one_out_model.predict(timeseries_window.reshape(1, 4))
+    pred_acc = prediction[0][0]
+    pred_delay = prediction[0][1]/10
+
+    # getting the model to be placed based on the prediction
+    predictive_model = placement(pred_acc, pred_delay)
+    return predictive_model
 
 
 def placement(req_accuracy, req_delay, model_evaluations=MODEL_EVALUATIONS, default_model="alexnet"):

@@ -1,7 +1,7 @@
 import time
 
 # from ckn.src.messagebroker.kafka_ingester import KafkaIngester
-from ckn.src.daemon.controller import random_placement, optimal_placement
+from ckn.src.daemon.controller import random_placement, optimal_placement, predictive_placement
 from flask import Flask, flash, request, redirect, url_for, jsonify
 import connexion
 import os
@@ -32,10 +32,13 @@ class Window:
     total_acc = 0
     total_delay = 0
     num_requests = 0
+    avg_acc = 0
+    avg_delay = 0
     model_name = 'SqueezeNet'
 
 
-window = Window()
+prev_window = Window()
+current_window = Window()
 
 
 @app.route("/")
@@ -54,7 +57,7 @@ def deploy_model():
     """
     model_name = request.args['model_name']
     load_model(model_name)
-    window.model_name = model_name
+    current_window.model_name = model_name
     return "Model Loaded " + str(model_name)
 
 
@@ -65,24 +68,31 @@ def changeTimestep():
     Returns:
 
     """
-    avg_acc = window.total_acc/window.num_requests
-    avg_delay = window.total_delay/window.num_requests
+    avg_acc = current_window.total_acc / current_window.num_requests
+    avg_delay = current_window.total_delay / current_window.num_requests
+    current_window.avg_acc = avg_acc
+    current_window.avg_delay = avg_delay
 
-    print("Avg Acc: {}\tAvg Delay: {}\tTotal requests: {}".format(avg_acc, avg_delay, window.num_requests))
+    print("Avg Acc: {}\tAvg Delay: {}\tTotal requests: {}".format(avg_acc, avg_delay, current_window.num_requests))
 
-    # changing the model
+    # Placement of the model
 
     # new_model = random_placement()
-    new_model = optimal_placement(avg_acc, avg_delay)
+    # new_model = optimal_placement(avg_acc, avg_delay)
+
+    new_model = predictive_placement(prev_window, current_window)
 
     load_model(new_model)
-    window.model_name = new_model
+    current_window.model_name = new_model
     print("Model Loaded " + str(new_model))
 
     # resetting the values
-    window.total_acc = 0
-    window.total_delay = 0
-    window.num_requests = 0
+    prev_window.avg_acc = avg_acc
+    prev_window.avg_delay = avg_delay
+
+    current_window.total_acc = 0
+    current_window.total_delay = 0
+    current_window.num_requests = 0
     return 'OK'
 
 
@@ -165,12 +175,12 @@ def process_w_qoe(file, data):
 
     qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, req_delay, req_acc)
 
-    result = {'prediction': prediction, "compute_time": compute_time, "probability": probability, 'QoE': qoe, 'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe, 'model': window.model_name}
-    qoe_event = send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe, window.model_name)
+    result = {'prediction': prediction, "compute_time": compute_time, "probability": probability, 'QoE': qoe, 'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe, 'model': current_window.model_name}
+    qoe_event = send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe, current_window.model_name)
 
-    window.total_acc += req_acc
-    window.total_delay += req_delay
-    window.num_requests += 1
+    current_window.total_acc += req_acc
+    current_window.total_delay += req_delay
+    current_window.num_requests += 1
 
     # filename = './QoE_SqueezeNet.csv'
     # filename = './QoE_DenseNet.csv'
@@ -178,7 +188,7 @@ def process_w_qoe(file, data):
     # filename = './QoE_MobileNetV2.csv'
     # filename = './QoE_MobileNet_Dogs.csv'
     # filename = './QoE_MobileNet_low_delay.csv'
-    filename = './QoE_optimal.csv'
+    filename = './QoE_predictive.csv'
     # filename = './QoE_GoogleNet.csv'
     # filename = './QoE_ResNet.csv'
     write_csv_file([qoe_event], filename)
