@@ -78,9 +78,8 @@ def changeTimestep():
     # Placement of the model
 
     # new_model = random_placement()
-    # new_model = optimal_placement(avg_acc, avg_delay)
-
-    new_model = predictive_placement(prev_window, current_window)
+    new_model = optimal_placement(avg_acc, avg_delay)
+    # new_model = predictive_placement(prev_window, current_window)
 
     load_model(new_model)
     current_window.model_name = new_model
@@ -183,14 +182,23 @@ def process_w_qoe(file, data):
     current_window.num_requests += 1
 
     # filename = './QoE_SqueezeNet.csv'
+    # filename = './QoE_Convnext_small.csv'
     # filename = './QoE_DenseNet.csv'
     # filename = './QoE_AlexNet.csv'
-    # filename = './QoE_MobileNetV2.csv'
+    # filename = './QoE_MobileNetV3.csv'
     # filename = './QoE_MobileNet_Dogs.csv'
     # filename = './QoE_MobileNet_low_delay.csv'
-    filename = './QoE_predictive.csv'
+    # filename = './QoE_convx_small_weight.csv'
     # filename = './QoE_GoogleNet.csv'
+    # filename = './QoE_ShuffleNet.csv'
+    # filename = './QoE_ResNext_new.csv'
     # filename = './QoE_ResNet.csv'
+    # filename = 'model_eval/QoE_RegNet_x_128gf.csv'
+
+
+    # filename = './QoE_random.csv'
+    filename = './QoE_optimal.csv'
+    # filename = './QoE_predictive.csv'
     write_csv_file([qoe_event], filename)
 
     return jsonify(result)

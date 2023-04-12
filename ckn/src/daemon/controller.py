@@ -3,7 +3,7 @@ import joblib
 import tensorflow as tf
 from ckn.src.daemon.constants import MODEL_EVALUATIONS, DEVICE_ACC_AVG, DEVICE_DELAY_AVG
 
-MODEL_NAMES = ['resnet18', 'googlenet', 'densenet121', 'alexnet', 'mobilenet_v2', 'squeezenet1_0']
+MODEL_NAMES = ['resnet152', 'googlenet', 'regnet', 'shufflenet_v2_x0_5', 'mobilenet_v3_small', 'squeezenet1_1', 'resnext50_32x4d', 'densenet201']
 
 # two_in_one_out_model = joblib.load("./models/2WindIn_1Out_model.pkl")
 two_in_one_out_model = tf.keras.models.load_model("./models/model.h5")
@@ -15,7 +15,7 @@ def random_placement():
     Returns:
 
     """
-    random_idx = np.random.randint(low=0, high=5)
+    random_idx = np.random.randint(low=0, high=7)
     return MODEL_NAMES[random_idx]
 
 
@@ -60,7 +60,7 @@ def predictive_placement(prev_window, current_window):
     return predictive_model
 
 
-def placement(req_accuracy, req_delay, model_evaluations=MODEL_EVALUATIONS, default_model="alexnet"):
+def placement(req_accuracy, req_delay, model_evaluations=MODEL_EVALUATIONS, default_model="squeezenet1_1"):
     """
     Given the next window values, provides the model with the optimal QoE values.
     Args:
