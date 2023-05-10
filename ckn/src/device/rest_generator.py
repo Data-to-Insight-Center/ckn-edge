@@ -159,7 +159,7 @@ def main():
     TOTAL_REQUESTS = 250000
     DISTINCT_IMAGES = 2000
     # max_iterations = int(TOTAL_REQUESTS/DISTINCT_IMAGES)
-    max_iterations = 1
+    max_iterations = 10
 
     # for i in range(max_iterations):
     #     for img_index in range(DISTINCT_IMAGES):
@@ -170,6 +170,7 @@ def main():
     #     # print("Total time: {}ms".format(round(time, 2)))
 
     for i in range(max_iterations):
+        total_splits = 0
         # each split contains single time frame data
         for split_idx in range(len(split_data)):
             # convert each split to json requests
@@ -182,9 +183,13 @@ def main():
             print("Signaling split end after {} requests!".format(len(split_data[split_idx])))
             signal_split_end()
             time.sleep(5)
+            total_splits += 1
+
+            if total_splits == 20:
+                continue
 
         print("{0} rounds sent!".format(i + 1))
-        print(response.text)
+        # print(response.text)
         # print("Total time: {}ms".format(round(time, 2)))
 
 
