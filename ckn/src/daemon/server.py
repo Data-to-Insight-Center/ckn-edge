@@ -24,7 +24,7 @@ app.config['TESTING'] = True
 app.config['SECRET_KEY'] = "ckn-edge-ai"
 
 server_list = 'localhost:9092'
-topic = 'inference-qoe-test3'
+topic = 'inference-qoe-test'
 producer = KafkaIngester(server_list, topic)
 
 

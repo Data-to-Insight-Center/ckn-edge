@@ -8,11 +8,16 @@ create (ed:EdgeDevice {name:'raspi-3', location: 'MESH_158B', bandwidth: '10Gbps
 create (ed:EdgeDevice {name:'raspi-4', location: 'MESH_158B', bandwidth: '20Gbps', status: 'ACTIVE'});
 create (ed:EdgeDevice {name:'raspi-5', location: 'MESH_158B', bandwidth: '20Gbps', status: 'ACTIVE'});
 
-match (es:EdgeServer {name:'EDGE-1'}) create (service:EdgeService {name: 'imagenet_image_classification', state: 'ACTIVE', state_changed: DATETIME()})-[r:HostedIn]->(es);
-match (es:EdgeServer {name:'EDGE-2'}) create (service:EdgeService {name: 'imagenet_image_classification', state: 'ACTIVE', state_changed: DATETIME()})-[r:HostedIn]->(es);
-match (es:EdgeServer {name:'EDGE-3'}) create (service:EdgeService {name: 'imagenet_image_classification', state: 'ACTIVE', state_changed: DATETIME()})-[r:HostedIn]->(es);
-match (es:EdgeServer {name:'EDGE-2'}) create (service:EdgeService {name: 'animal_sound_identification', state: 'ACTIVE', state_changed: DATETIME()})-[r:HostedIn]->(es);
-match (es:EdgeServer {name:'EDGE-3'}) create (service:EdgeService {name: 'car_detection', state: 'ACTIVE', state_changed: DATETIME()})-[r:HostedIn]->(es);
+create (service:Service {name: 'imagenet_image_classification', state: 'ACTIVE', state_changed: DATETIME()});
+create (service:Service {name: 'animal_sound_identification', state: 'ACTIVE', state_changed: DATETIME()});
+create (service:Service {name: 'car_detection', state: 'ACTIVE', state_changed: DATETIME()});
+
+match (es:EdgeServer {name:'EDGE-1'}) match (service:Service {name: 'imagenet_image_classification'}) create (service)-[r:HostedIn]->(es);
+match (es:EdgeServer {name:'EDGE-2'}) match (service:Service {name: 'imagenet_image_classification'}) create (service)-[r:HostedIn]->(es);
+match (es:EdgeServer {name:'EDGE-3'}) match (service:Service {name: 'imagenet_image_classification'}) create (service)-[r:HostedIn]->(es);
+match (es:EdgeServer {name:'EDGE-2'}) match (service:Service {name: 'car_detection'}) create (service)-[r:HostedIn]->(es);
+match (es:EdgeServer {name:'EDGE-3'}) match (service:Service {name: 'animal_sound_identification'}) create (service)-[r:HostedIn]->(es);
+
 --
 -- match (es:EdgeService {name:'es_1_service_0'}) create (model:ServiceModel {name: 'es_1_service_0_model_0', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
 -- match (es:EdgeService {name:'es_1_service_0'}) create (model:ServiceModel {name: 'es_1_service_0_model_1', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);

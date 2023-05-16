@@ -1,0 +1,20 @@
+{
+  "name": "Neo4jSinkConnectorJSON",
+  "config": {
+    "topics": "aggregated-events",
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "key.converter.schemas.enable": false,
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+    "errors.retry.timeout": "-1",
+    "errors.retry.delay.max.ms": "1000",
+    "errors.tolerance": "all",
+    "errors.log.enable": true,
+    "errors.log.include.messages": true,
+    "neo4j.server.uri": "bolt://neo4j:7687",
+    "neo4j.authentication.basic.username": "neo4j",
+    "neo4j.authentication.basic.password": "password",
+    "neo4j.topic.cypher.aggregated-events": "MERGE (c:EdgeDevice{name: event.client_id}) MERGE (es:EdgeServer{name: event.server_id}) CREATE (c)-[we:WINDOW_EVENT{req_acc:event.average_req_accuracy, req_delay:event.average_req_delay, count:event.total_events, avg_qoe:event.average_qoe, avg_qod:event.average_qoe_delay, avg_qoa:event.average_qoe_acc, avg_pred_acc:event.average_pred_acc, avg_compute_time:event.average_compute_time, model:event.model, service_id:event.service_id, timestamp:event.timestamp}]->(es);"
+  }
+}
