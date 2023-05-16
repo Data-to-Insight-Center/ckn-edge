@@ -94,9 +94,14 @@ public class StreamProcessor {
 
     private static AverageAggregator process_average(CountSumAggregator value){
         long count = value.getCount();
-        float average_accuracy = value.getAccuracy_total()/count;
-        float average_delay = value.getDelay_total()/count;
-        return new AverageAggregator(average_accuracy, average_delay, count, value.getClient_id(), value.getService_id(), value.getServer_id(), System.currentTimeMillis());
+        float avg_req_accuracy = value.getAccuracy_total()/count;
+        float avg_req_delay = value.getDelay_total()/count;
+        float avg_total_qoe = value.getQoe_total_sum()/count;
+        float avg_qoe_delay = value.getQoe_delay_total()/count;
+        float avg_qoe_acc = value.getQoe_acc_total()/count;
+        float avg_pred_acc = value.getPred_acc_total()/count;
+        float avg_compute_time = value.getCompute_time_total()/count;
+        return new AverageAggregator(avg_req_accuracy, avg_req_delay, count, avg_total_qoe, avg_qoe_delay, avg_qoe_acc, avg_pred_acc, avg_compute_time, value.getClient_id(), value.getService_id(), value.getServer_id(), value.getModel(), System.currentTimeMillis());
     }
 
     private static StreamsBuilder getEdgeStreamsBuilder() {

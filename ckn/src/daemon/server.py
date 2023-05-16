@@ -1,6 +1,6 @@
 import time
 
-# from ckn.src.messagebroker.kafka_ingester import KafkaIngester
+from ckn.src.messagebroker.kafka_ingester import KafkaIngester
 from ckn.src.daemon.controller import random_placement, optimal_placement, predictive_placement
 from flask import Flask, flash, request, redirect, url_for, jsonify
 import connexion
@@ -24,8 +24,8 @@ app.config['TESTING'] = True
 app.config['SECRET_KEY'] = "ckn-edge-ai"
 
 server_list = 'localhost:9092'
-topic = 'qoe-events-test'
-# producer = KafkaIngester(server_list, topic)
+topic = 'inference-qoe-test3'
+producer = KafkaIngester(server_list, topic)
 
 
 class Window:
@@ -197,7 +197,7 @@ def process_w_qoe(file, data):
 
 
     # filename = './QoE_random.csv'
-    filename = './QoE_optimal.csv'
+    filename = './kafka_test.csv'
     # filename = './QoE_predictive.csv'
     write_csv_file([qoe_event], filename)
 
@@ -209,15 +209,16 @@ def send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe
     req_delay = float(data['delay'])
 
     qoe_event = {'server_id': data['server_id'], 'service_id': data['service_id'], 'client_id': data['client_id'],
-                 'prediction': prediction, "compute_time": compute_time, "pred_acc": probability, 'QoE': qoe,
-                 'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe, 'req_acc': req_acc, 'req_delay': req_delay,
+                 'prediction': prediction, "compute_time": compute_time, "pred_accuracy": probability, 'total_qoe': qoe,
+                 'accuracy_qoe': acc_qoe, 'delay_qoe': delay_qoe, 'req_acc': req_acc, 'req_delay': req_delay,
                  'model': model_name, 'added_time': data['added_time']}
-    # producer.send_qoe(qoe_event)
+    # todo: change the key for partitioning
+    producer.send_request(qoe_event, key="ckn-edge")
     return qoe_event
 
 
 def write_csv_file(data, filename):
-    csv_columns = ['server_id', 'service_id', 'client_id', 'prediction', 'compute_time', 'pred_acc', 'QoE', 'Acc_QoE', 'Delay_QoE', 'req_acc', 'req_delay', 'model', 'added_time']
+    csv_columns = ['server_id', 'service_id', 'client_id', 'prediction', 'compute_time', 'pred_accuracy', 'total_qoe', 'accuracy_qoe', 'delay_qoe', 'req_acc', 'req_delay', 'model', 'added_time']
     with open(filename, "a") as file:
         csvwriter = csv.DictWriter(file, csv_columns)
         # csvwriter.writeheader()
