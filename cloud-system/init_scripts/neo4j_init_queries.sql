@@ -17,26 +17,3 @@ match (es:EdgeServer {name:'EDGE-2'}) match (service:Service {name: 'imagenet_im
 match (es:EdgeServer {name:'EDGE-3'}) match (service:Service {name: 'imagenet_image_classification'}) create (service)-[r:HostedIn]->(es);
 match (es:EdgeServer {name:'EDGE-2'}) match (service:Service {name: 'car_detection'}) create (service)-[r:HostedIn]->(es);
 match (es:EdgeServer {name:'EDGE-3'}) match (service:Service {name: 'animal_sound_identification'}) create (service)-[r:HostedIn]->(es);
-
---
--- match (es:EdgeService {name:'es_1_service_0'}) create (model:ServiceModel {name: 'es_1_service_0_model_0', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_1_service_0'}) create (model:ServiceModel {name: 'es_1_service_0_model_1', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_1_service_0'}) create (model:ServiceModel {name: 'es_1_service_0_model_2', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_1_service_0'}) create (model:ServiceModel {name: 'es_1_service_0_model_3', state: 'INACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_1_service_0'}) create (model:ServiceModel {name: 'es_1_service_0_model_4', state: 'INACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_1_service_0'}) create (model:ServiceModel {name: 'es_1_service_0_model_5', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
---
--- match (es:EdgeService {name:'es_2_service_0'}) create (model:ServiceModel {name: 'es_2_service_0_model_0', state: 'INACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_2_service_0'}) create (model:ServiceModel {name: 'es_2_service_0_model_1', state: 'INACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_2_service_0'}) create (model:ServiceModel {name: 'es_2_service_0_model_2', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_2_service_0'}) create (model:ServiceModel {name: 'es_2_service_0_model_3', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_2_service_0'}) create (model:ServiceModel {name: 'es_2_service_0_model_4', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_2_service_0'}) create (model:ServiceModel {name: 'es_2_service_0_model_5', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
---
--- match (es:EdgeService {name:'es_3_service_0'}) create (model:ServiceModel {name: 'es_3_service_0_model_0', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_3_service_0'}) create (model:ServiceModel {name: 'es_3_service_0_model_1', state: 'INACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_3_service_0'}) create (model:ServiceModel {name: 'es_3_service_0_model_2', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_3_service_0'}) create (model:ServiceModel {name: 'es_3_service_0_model_3', state: 'ACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_3_service_0'}) create (model:ServiceModel {name: 'es_3_service_0_model_4', state: 'INACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
--- match (es:EdgeService {name:'es_3_service_0'}) create (model:ServiceModel {name: 'es_3_service_0_model_5', state: 'INACTIVE', state_changed: DATETIME()})-[r:AvailableFor]->(es);
---

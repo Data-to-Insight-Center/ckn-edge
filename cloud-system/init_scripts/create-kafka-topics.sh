@@ -1,3 +1,2 @@
-bash -c 'echo Waiting for Kafka to be ready... && \
-                         kafka-topics --create --if-not-exists --topic inference-events --bootstrap-server broker:9092 && \
-                         kafka-topics --create --if-not-exists --topic aggregated-events --bootstrap-server broker:9092'
+docker exec -it broker kafka-topics --create --if-not-exists --topic inference-qoe-test --bootstrap-server broker:9092
+docker exec -it broker kafka-topics --create --if-not-exists --topic aggregate-events --bootstrap-server broker:9092
