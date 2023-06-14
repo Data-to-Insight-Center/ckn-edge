@@ -72,7 +72,6 @@ public class StreamProcessor {
                         Consumed.with(Serdes.String(), inferenceEventSerde)
                                 .withTimestampExtractor(new EventTimeExtractor()));
 
-        // todo: tumbling or sliding window?
         inferenceEventKStream.groupByKey()
                 .windowedBy(TimeWindows.of(Duration.ofSeconds(timeWindowSize)).grace(Duration.ofSeconds(windowGracePeriod)))
                 .aggregate(CountSumAggregator::new,

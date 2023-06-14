@@ -8,8 +8,12 @@ import os
 from model import predict, pre_process, load_model
 import numpy as np
 import csv
+import logging
+
 
 app = connexion.App(__name__, specification_dir="./")
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 # api specification
 # app.add_api("api.yml")
@@ -78,8 +82,8 @@ def changeTimestep():
     # Placement of the model
 
     # new_model = random_placement()
-    new_model = optimal_placement(avg_acc, avg_delay)
-    # new_model = predictive_placement(prev_window, current_window)
+    # new_model = optimal_placement(avg_acc, avg_delay)
+    new_model = predictive_placement(prev_window, current_window)
 
     load_model(new_model)
     current_window.model_name = new_model

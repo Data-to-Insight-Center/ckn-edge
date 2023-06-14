@@ -6,7 +6,7 @@ from ckn.src.daemon.constants import MODEL_EVALUATIONS, DEVICE_ACC_AVG, DEVICE_D
 MODEL_NAMES = ['resnet152', 'googlenet', 'regnet', 'shufflenet_v2_x0_5', 'mobilenet_v3_small', 'squeezenet1_1', 'resnext50_32x4d', 'densenet201']
 
 # two_in_one_out_model = joblib.load("./models/2WindIn_1Out_model.pkl")
-two_in_one_out_model = tf.keras.models.load_model("./models/model.h5")
+two_in_one_out_model = tf.keras.models.load_model("/Users/swithana/git/ckn-edge/ckn/src/daemon/models/model.h5")
 
 
 def random_placement():
@@ -54,6 +54,8 @@ def predictive_placement(prev_window, current_window):
     prediction = two_in_one_out_model.predict(timeseries_window.reshape(1, 4))
     pred_acc = prediction[0][0]
     pred_delay = prediction[0][1]/10
+
+    print("Prev window: [{0}, {1}]\tCurrent window: [{2},{3}]\t Predicted Window: [{4}, {5}]".format(prev_window.avg_acc, prev_window.avg_delay, current_window.avg_acc, current_window.avg_delay, pred_acc, pred_delay))
 
     # getting the model to be placed based on the prediction
     predictive_model = placement(pred_acc, pred_delay)

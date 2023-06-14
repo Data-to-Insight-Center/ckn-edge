@@ -159,7 +159,7 @@ def main():
     TOTAL_REQUESTS = 250000
     DISTINCT_IMAGES = 2000
     # max_iterations = int(TOTAL_REQUESTS/DISTINCT_IMAGES)
-    max_iterations = 10
+    max_iterations = 5
 
     # for i in range(max_iterations):
     #     for img_index in range(DISTINCT_IMAGES):
@@ -186,9 +186,8 @@ def main():
             total_splits += 1
 
             if total_splits == 20:
-                continue
-
-        print("{0} rounds sent!".format(i + 1))
+                print("{0} rounds sent!".format(i + 1))
+                break
         # print(response.text)
         # print("Total time: {}ms".format(round(time, 2)))
 
