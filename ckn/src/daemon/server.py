@@ -27,9 +27,13 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['TESTING'] = True
 app.config['SECRET_KEY'] = "ckn-edge-ai"
 
+SERVER_ID = "EDGE-1"
 server_list = 'localhost:9092'
-topic = 'inference-qoe-test'
-producer = KafkaIngester(server_list, topic)
+inference_topic = 'inference-qoe-test'
+model_deployment_topic = 'model-deployments'
+
+producer = KafkaIngester(server_list, inference_topic)
+model_producer = KafkaIngester(server_list, model_deployment_topic)
 
 
 class Window:
@@ -62,6 +66,10 @@ def deploy_model():
     model_name = request.args['model_name']
     load_model(model_name)
     current_window.model_name = model_name
+
+    # send the model changed info to the knowledge graph
+    send_model_change(model_name)
+
     return "Model Loaded " + str(model_name)
 
 
@@ -89,6 +97,9 @@ def changeTimestep():
     current_window.model_name = new_model
     print("Model Loaded " + str(new_model))
 
+    # send the model changed info to the knowledge graph
+    send_model_change(new_model)
+
     # resetting the values
     prev_window.avg_acc = avg_acc
     prev_window.avg_delay = avg_delay
@@ -97,6 +108,13 @@ def changeTimestep():
     current_window.total_delay = 0
     current_window.num_requests = 0
     return 'OK'
+
+
+def send_model_change(new_model):
+    # send the model changed info to the knowledge graph
+    model_change = {"server_id": SERVER_ID, "model": new_model}
+    model_producer.send_request(model_change, key=SERVER_ID)
+    print("Model change to {} sent to CKN".format(new_model))
 
 
 def check_file_extension(filename):

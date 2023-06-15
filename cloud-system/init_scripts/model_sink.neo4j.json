@@ -1,0 +1,20 @@
+{
+  "name": "Neo4jSinkConnectorModelChangeJSON",
+  "config": {
+    "topics": "model-deployments",
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "key.converter.schemas.enable": false,
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+    "errors.retry.timeout": "-1",
+    "errors.retry.delay.max.ms": "1000",
+    "errors.tolerance": "all",
+    "errors.log.enable": true,
+    "errors.log.include.messages": true,
+    "neo4j.server.uri": "bolt://neo4j:7687",
+    "neo4j.authentication.basic.username": "neo4j",
+    "neo4j.authentication.basic.password": "password",
+    "neo4j.topic.cypher.model-deployments": "MATCH (es:EdgeServer {name: event.server_id}) MATCH (ai:AIModel {name: event.model}) CREATE (ai)-[d:DEPLOYED_IN {changed_at: TIMESTAMP()}]->(es)"
+  }
+}

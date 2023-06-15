@@ -1,5 +1,5 @@
 {
-  "name": "Neo4jSinkConnectorJSON",
+  "name": "Neo4jSinkConnectorAggregatorJSON",
   "config": {
     "topics": "aggregated-events",
     "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
