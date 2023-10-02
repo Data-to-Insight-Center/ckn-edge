@@ -10,7 +10,11 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.WindowStore;
-import org.d2i.ckn.model.*;
+import org.d2i.ckn.model.JsonSerde;
+import org.d2i.ckn.model.power.CountSumAggregator;
+import org.d2i.ckn.model.power.EventTimeExtractor;
+import org.d2i.ckn.model.power.PowerEvent;
+import org.d2i.ckn.model.power.AggregatedPowerEvent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +22,7 @@ import java.time.Duration;
 import java.util.Properties;
 
 @Slf4j
-public class StreamProcessor {
+public class PowerStreamProcessor {
 
     private static String inputTopic;
     private static String outputTopic;
@@ -29,8 +33,9 @@ public class StreamProcessor {
     private static long timeWindowSize;
     private static int windowGracePeriod;
     public static void main(String[] args) {
+
         // load the configurations
-        try (InputStream input = StreamProcessor.class.getClassLoader().getResourceAsStream("config.properties")) {
+        try (InputStream input = PowerStreamProcessor.class.getClassLoader().getResourceAsStream("config.properties")) {
             Properties config = new Properties();
             if (input == null) {
                 log.error("The configuration file could not be found!");
@@ -64,15 +69,15 @@ public class StreamProcessor {
 
     private static StreamsBuilder getWindowedAggregationBuilder() {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
-        Serde<InferenceEvent> inferenceEventSerde = new JsonSerde<>(InferenceEvent.class);
+        Serde<PowerEvent> powerEventSerde = new JsonSerde<>(PowerEvent.class);
         Serde<CountSumAggregator> countSumAggregatorSerde = new JsonSerde<>(CountSumAggregator.class);
-        Serde<AverageAggregator> averageAggregatorSerde = new JsonSerde<>(AverageAggregator.class);
+        Serde<AggregatedPowerEvent> averageAggregatorSerde = new JsonSerde<>(AggregatedPowerEvent.class);
 
-        KStream<String, InferenceEvent> inferenceEventKStream = streamsBuilder.stream(inputTopic,
-                        Consumed.with(Serdes.String(), inferenceEventSerde)
+        KStream<String, PowerEvent> powerEventKStream = streamsBuilder.stream(inputTopic,
+                        Consumed.with(Serdes.String(), powerEventSerde)
                                 .withTimestampExtractor(new EventTimeExtractor()));
 
-        inferenceEventKStream.groupByKey()
+        powerEventKStream.groupByKey()
                 .windowedBy(TimeWindows.of(Duration.ofSeconds(timeWindowSize)).grace(Duration.ofSeconds(windowGracePeriod)))
                 .aggregate(CountSumAggregator::new,
                         (key, value, aggregate) -> aggregate.process(value),
@@ -91,24 +96,18 @@ public class StreamProcessor {
         return streamsBuilder;
     }
 
-    private static AverageAggregator process_average(CountSumAggregator value){
+    private static AggregatedPowerEvent process_average(CountSumAggregator value){
         long count = value.getCount();
-        float avg_req_accuracy = value.getAccuracy_total()/count;
-        float avg_req_delay = value.getDelay_total()/count;
-        float avg_total_qoe = value.getQoe_total_sum()/count;
-        float avg_qoe_delay = value.getQoe_delay_total()/count;
-        float avg_qoe_acc = value.getQoe_acc_total()/count;
-        float avg_pred_acc = value.getPred_acc_total()/count;
-        float avg_compute_time = value.getCompute_time_total()/count;
-        return new AverageAggregator(avg_req_accuracy, avg_req_delay, count, avg_total_qoe, avg_qoe_delay, avg_qoe_acc, avg_pred_acc, avg_compute_time, value.getClient_id(), value.getService_id(), value.getServer_id(), value.getModel(), System.currentTimeMillis());
+        double avg_power = value.getPower_total()/count;
+        return new AggregatedPowerEvent(avg_power, value.getClient_id(), value.getProcess_id(), value.getProcess_name(), System.currentTimeMillis());
     }
 
     private static StreamsBuilder getEdgeStreamsBuilder() {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
-        Serde<InferenceEvent> inferenceEvents = new JsonSerde<>(InferenceEvent.class);
+        Serde<PowerEvent> powerEventSerde = new JsonSerde<>(PowerEvent.class);
 
         KStream<String, Long> inferenceEventKStream = streamsBuilder.stream(inputTopic,
-                        Consumed.with(Serdes.String(), inferenceEvents))
+                        Consumed.with(Serdes.String(), powerEventSerde))
 //                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value.getClient_id() + "\taccuracy" + value.getAccuracy()))
                 .groupByKey()
                 .count()

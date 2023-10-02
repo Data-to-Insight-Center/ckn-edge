@@ -10,7 +10,6 @@ import numpy as np
 import csv
 import logging
 
-
 app = connexion.App(__name__, specification_dir="./")
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -88,7 +87,6 @@ def changeTimestep():
     print("Avg Acc: {}\tAvg Delay: {}\tTotal requests: {}".format(avg_acc, avg_delay, current_window.num_requests))
 
     # Placement of the model
-
     # new_model = random_placement()
     # new_model = optimal_placement(avg_acc, avg_delay)
     new_model = predictive_placement(prev_window, current_window)
@@ -190,6 +188,7 @@ def process_w_qoe(file, data):
     prediction, probability = predict(preprocessed_input)
     compute_time = time.time() - start_time
 
+    pub_timer = time.time()
     # processing the QoE values
     req_acc = float(data['accuracy'])
     req_delay = float(data['delay'])
@@ -197,11 +196,16 @@ def process_w_qoe(file, data):
     qoe, acc_qoe, delay_qoe = process_qoe(probability, compute_time, req_delay, req_acc)
 
     result = {'prediction': prediction, "compute_time": compute_time, "probability": probability, 'QoE': qoe, 'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe, 'model': current_window.model_name}
-    qoe_event = send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe, current_window.model_name)
 
+    qoe_event = send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe, current_window.model_name)
+    pub_time = time.time() - pub_timer
+
+    predict_timer = time.time()
     current_window.total_acc += req_acc
     current_window.total_delay += req_delay
     current_window.num_requests += 1
+
+    dnn_time = time.time() - predict_timer
 
     # filename = './QoE_SqueezeNet.csv'
     # filename = './QoE_Convnext_small.csv'
@@ -219,9 +223,13 @@ def process_w_qoe(file, data):
 
 
     # filename = './QoE_random.csv'
-    filename = './kafka_test.csv'
+    # filename = './kafka_test.csv'
     # filename = './QoE_predictive.csv'
-    write_csv_file([qoe_event], filename)
+    perf_filename = './timers.csv'
+
+    perf_event = {'compute_time': compute_time, 'pub_time': pub_time, 'dnn_time': dnn_time}
+    # write_csv_file([qoe_event], filename)
+    write_perf_file([perf_event], perf_filename)
 
     return jsonify(result)
 
@@ -241,6 +249,14 @@ def send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe
 
 def write_csv_file(data, filename):
     csv_columns = ['server_id', 'service_id', 'client_id', 'prediction', 'compute_time', 'pred_accuracy', 'total_qoe', 'accuracy_qoe', 'delay_qoe', 'req_acc', 'req_delay', 'model', 'added_time']
+    with open(filename, "a") as file:
+        csvwriter = csv.DictWriter(file, csv_columns)
+        # csvwriter.writeheader()
+        csvwriter.writerows(data)
+
+
+def write_perf_file(data, filename):
+    csv_columns = ['compute_time', 'pub_time', 'dnn_time']
     with open(filename, "a") as file:
         csvwriter = csv.DictWriter(file, csv_columns)
         # csvwriter.writeheader()

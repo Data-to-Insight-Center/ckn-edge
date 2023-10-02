@@ -25,7 +25,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>org.d2i.ckn.StreamProcessor</mainClass>
+									<mainClass>org.d2i.ckn.StreamProcessorQoE</mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>
@@ -53,7 +53,7 @@
 	<name>CKN-streamprocessor</name>
 
 	<properties>
-		<main.class>org.d2i.ckn.StreamProcessor</main.class>
+		<main.class>org.d2i.ckn.StreamProcessorQoE</main.class>
 	</properties>
 
 	<dependencies>

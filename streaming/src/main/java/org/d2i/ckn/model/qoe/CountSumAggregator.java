@@ -1,4 +1,4 @@
-package org.d2i.ckn.model;
+package org.d2i.ckn.model.qoe;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

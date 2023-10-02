@@ -1,10 +1,11 @@
-package org.d2i.ckn.model;
+package org.d2i.ckn.model.qoe;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.d2i.ckn.model.EdgeEvent;
 
 import java.util.Date;
 
@@ -12,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class InferenceEvent implements EdgeEvent{
+public class InferenceEvent implements EdgeEvent {
     private String server_id;
     private String service_id;
     private String client_id;

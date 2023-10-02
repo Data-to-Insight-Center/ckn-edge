@@ -8,8 +8,8 @@ import time
 This generates the REST requests along with the images to be sent to the EDGE REST interfaces. 
 """
 
-URL = "http://localhost:8080/qoe_predict"
-SIGNAL_URL = "http://localhost:8080/changetimestep"
+URL = "http://149.165.175.73:8080/qoe_predict"
+SIGNAL_URL = "http://149.165.175.73:8080/changetimestep"
 DEVICE_NAME = "raspi-3"
 DATA_FILE = 'data/1_min_window_low_delay_high_rps.csv'
 IMAGE_DIRECTORY = './data/images'
