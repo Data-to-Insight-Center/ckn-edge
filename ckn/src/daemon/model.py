@@ -2,7 +2,9 @@ import torch
 from PIL import Image
 from torchvision import transforms
 from torchvision import models
-
+from PytorchWildlife.models import classification as pw_classification
+from PytorchWildlife.data import transforms as pw_trans
+import numpy as np
 
 class ModelStore:
     # loading the model
@@ -26,7 +28,7 @@ class ModelStore:
     # model = models.regnet_y_128gf(weights="IMAGENET1K_SWAG_E2E_V1")
     # MobileNet_V3_Small
 
-    model.eval()
+    # model.eval()
 
     def change_model(self, model_name):
         if model_name == 'regnet':
@@ -36,8 +38,11 @@ class ModelStore:
             self.model = torch.hub.load('pytorch/vision:v0.10.0', model_name, pretrained=True)
         self.model.eval()
 
+    classification_model = pw_classification.AI4GAmazonRainforest()
+
 
 model_store = ModelStore()
+
 
 def load_model(model_name):
     model_store.change_model(model_name)
@@ -80,3 +85,20 @@ def predict(input):
     high_prob, pred_label = torch.topk(prob, 1)
 
     return str((labels[pred_label[0]])), high_prob[0].item()
+
+
+def predict_megadetector(filename):
+    input_image = Image.open(filename)
+    trans_clf = pw_trans.Classification_Inference_Transform(target_size=224)
+
+    # preprocess = transforms.Compose([
+    #     transforms.Resize(400),
+    #     # transforms.CenterCrop(224),
+    #     transforms.ToTensor(),
+    #     # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    # ])
+    # input_tensor = preprocess(input_image)
+    # result = model_store.classification_model.single_image_classification(input_tensor)
+
+    result = model_store.classification_model.single_image_classification(trans_clf(input_image))
+    return result

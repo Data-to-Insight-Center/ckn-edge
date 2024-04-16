@@ -5,7 +5,7 @@ from ckn.src.daemon.controller import random_placement, optimal_placement, predi
 from flask import Flask, flash, request, redirect, url_for, jsonify
 import connexion
 import os
-from model import predict, pre_process, load_model
+from model import predict, pre_process, load_model, predict_megadetector
 import numpy as np
 import csv
 import logging
@@ -31,8 +31,8 @@ server_list = 'localhost:9092'
 inference_topic = 'inference-qoe-test'
 model_deployment_topic = 'model-deployments'
 
-producer = KafkaIngester(server_list, inference_topic)
-model_producer = KafkaIngester(server_list, model_deployment_topic)
+# producer = KafkaIngester(server_list, inference_topic)
+# model_producer = KafkaIngester(server_list, model_deployment_topic)
 
 
 class Window:
@@ -182,10 +182,13 @@ def process_w_qoe(file, data):
     filename = save_file(file)
 
     start_time = time.time()
-    # pre-processing the image
-    preprocessed_input = pre_process(filename)
-    # prediction on the pre-processed image
-    prediction, probability = predict(preprocessed_input)
+    # # pre-processing the image
+    # preprocessed_input = pre_process(filename)
+    # # prediction on the pre-processed image
+    # prediction, probability = predict(preprocessed_input)
+    result = predict_megadetector(filename)
+    prediction = result['prediction']
+    probability = result['confidence']
     compute_time = time.time() - start_time
 
     pub_timer = time.time()
@@ -197,7 +200,7 @@ def process_w_qoe(file, data):
 
     result = {'prediction': prediction, "compute_time": compute_time, "probability": probability, 'QoE': qoe, 'Acc_QoE': acc_qoe, 'Delay_QoE': delay_qoe, 'model': current_window.model_name}
 
-    qoe_event = send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe, current_window.model_name)
+    # qoe_event = send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe, delay_qoe, current_window.model_name)
     pub_time = time.time() - pub_timer
 
     predict_timer = time.time()
