@@ -6,7 +6,7 @@ from ckn.src.daemon.constants import MODEL_EVALUATIONS, DEVICE_ACC_AVG, DEVICE_D
 MODEL_NAMES = ['resnet152', 'googlenet', 'regnet', 'shufflenet_v2_x0_5', 'mobilenet_v3_small', 'squeezenet1_1', 'resnext50_32x4d', 'densenet201']
 
 # two_in_one_out_model = joblib.load("./models/2WindIn_1Out_model.pkl")
-two_in_one_out_model = tf.keras.models.load_model("/Users/swithana/git/ckn-edge/ckn/src/daemon/models/model.h5")
+two_in_one_out_model = tf.keras.models.load_model("./models/model.h5")
 
 
 def random_placement():
