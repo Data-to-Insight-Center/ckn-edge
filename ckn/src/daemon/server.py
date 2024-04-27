@@ -37,7 +37,7 @@ class Window:
     num_requests = 0
     avg_acc = 0
     avg_delay = 0
-    model_name = 'MobileNet'
+    model_name = 'ResNet'
 
 
 prev_window = Window()
@@ -177,4 +177,4 @@ def qoe_predict():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=False)
+    app.run(host="0.0.0.0", port=8081, debug=False)

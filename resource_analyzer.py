@@ -11,13 +11,12 @@ import csv
 headers = ['timestamp', 'cpu_usage_percent', 'memory_usage_percent', 'memory_usage_GB', 'used_drive_gb',
            'used_drive_percentage', 'power_consumption']
 
-# CSV file path
-csv_file_path = '/Users/neeleshkarthikeyan/ckn-edge/resource_consumption.csv'
+CSV_FILE_PATH = 'MobileNet_resource_consumption.csv'
 
 
 def ensure_csv_headers():
-    if not os.path.exists(csv_file_path):
-        with open(csv_file_path, 'w', newline='') as file:
+    if not os.path.exists(CSV_FILE_PATH):
+        with open(CSV_FILE_PATH, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(headers)
 
@@ -73,10 +72,14 @@ def monitor_system(time_window=5, run_time=10):
         data = [formatted_time, cpu_usage, memory_usage.percent, used_memory_gb,
                 used_drive_gb, used_drive_percentage, power_consumption]
 
-        with open(csv_file_path, 'a', newline='') as file:
+        with open(CSV_FILE_PATH, 'a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(data)
 
 
 if __name__ == "__main__":
-    monitor_system(time_window=1, run_time=300)  # Run the monitoring for 10 seconds
+
+    if os.path.exists(CSV_FILE_PATH):
+        os.remove(CSV_FILE_PATH)
+
+    monitor_system(time_window=1, run_time=400)  # Run the monitoring for 10 seconds
