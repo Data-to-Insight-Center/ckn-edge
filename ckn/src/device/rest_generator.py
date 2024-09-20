@@ -8,8 +8,9 @@ import time
 This generates the REST requests along with the images to be sent to the EDGE REST interfaces. 
 """
 
-URL = "http://149.165.175.73:8080/qoe_predict"
-SIGNAL_URL = "http://149.165.175.73:8080/changetimestep"
+URL = "http://10.20.72.45:8080/predict"
+# URL = "http://10.20.27.186:8080/predict"
+SIGNAL_URL = "http:/10.20.72.45:8080/changetimestep"
 DEVICE_NAME = "raspi-3"
 DATA_FILE = 'data/1_min_window_low_delay_high_rps.csv'
 IMAGE_DIRECTORY = './data/images'
@@ -159,7 +160,7 @@ def main():
     TOTAL_REQUESTS = 250000
     DISTINCT_IMAGES = 2000
     # max_iterations = int(TOTAL_REQUESTS/DISTINCT_IMAGES)
-    max_iterations = 5
+    max_iterations = 1
 
     # for i in range(max_iterations):
     #     for img_index in range(DISTINCT_IMAGES):
@@ -181,7 +182,7 @@ def main():
                 response, r_time = send_request(images_raspi_1[k], image_paths[k], json_requests[k])
 
             print("Signaling split end after {} requests!".format(len(split_data[split_idx])))
-            signal_split_end()
+            # signal_split_end()
             time.sleep(5)
             total_splits += 1
 
