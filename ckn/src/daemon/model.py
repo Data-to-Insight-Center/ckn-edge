@@ -3,8 +3,23 @@ from PIL import Image
 from torchvision import transforms
 from torchvision import models
 
+model_mapping = {
+    "550e8400-e29b-41d4-a716-446655440000": "resnet152",
+    "550e8400-e29b-41d4-a716-446655440001": "shufflenet_v2_x0_5",
+    "550e8400-e29b-41d4-a716-446655440002": "densenet201",
+    "550e8400-e29b-41d4-a716-446655440003": "mobilenet_v3_small",
+    "550e8400-e29b-41d4-a716-446655440004": "resnext50_32x4d",
+    "550e8400-e29b-41d4-a716-446655440005": "googlenet"
+}
 
 class ModelStore:
+    def __init__(self):
+        self.model_index = 0
+        self.current_model_id = "550e8400-e29b-41d4-a716-446655440000"
+
+    def get_current_model_id(self):
+        return self.current_model_id
+
     # loading the model
     # model = models.squeezenet1_1(weights="SqueezeNet1_1_Weights.IMAGENET1K_V1")
     # model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
@@ -15,8 +30,8 @@ class ModelStore:
     # model = models.resnet50(weights="IMAGENET1K_V2")
     # model = torch.hub.load('pytorch/vision:v0.10.0', 'convnext', pretrained=True)
 
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'squeezenet1_1', pretrained=True)
-    # model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet152', pretrained=True)
+    # model = torch.hub.load('pytorch/vision:v0.10.0', 'squeezenet1_1', pretrained=True)
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet152', pretrained=True)
     # model = torch.hub.load('pytorch/vision:v0.10.0', 'shufflenet_v2_x0_5', pretrained=True)
     # model = torch.hub.load('pytorch/vision:v0.10.0', 'densenet201', pretrained=True)
     # model = torch.hub.load('pytorch/vision:v0.10.0', 'mobilenet_v3_small', pretrained=True)
@@ -36,11 +51,35 @@ class ModelStore:
             self.model = torch.hub.load('pytorch/vision:v0.10.0', model_name, pretrained=True)
         self.model.eval()
 
+    def load_next_model(self):
+        """
+        Loads the next model in the model mapping.
+        If all models have been loaded, it starts from the beginning.
+        """
+
+        # calculate the next model id and model name
+        model_keys = list(model_mapping.keys())
+        new_model_index = (self.model_index + 1) % len(model_keys)
+
+        # get the next model id and name
+        new_model_id = model_keys[new_model_index]
+        new_model_name = model_mapping[new_model_id]
+
+        # Print the model information
+        print(f"Loading model with UUID: {new_model_id} -> Model: {new_model_name}")
+        self.change_model(new_model_name)
+
+        # Update the index for the next call
+        self.model_index = new_model_index
+        self.current_model_id = new_model_id
+
+        return new_model_name, new_model_id
+
+    def load_model(self, model_name):
+        self.change_model(model_name)
+
 
 model_store = ModelStore()
-
-def load_model(model_name):
-    model_store.change_model(model_name)
 
 
 # retrieving the class label
