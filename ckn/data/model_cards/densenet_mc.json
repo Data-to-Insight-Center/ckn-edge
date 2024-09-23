@@ -1,0 +1,35 @@
+{
+  "name": "DenseNet-201 for Image Classification",
+  "version": "1.0",
+  "short_description": "Deep image classification using DenseNet-201.",
+  "full_description": "DenseNet-201 is a densely connected convolutional neural network architecture designed for image classification tasks. Introduced in the paper 'Densely Connected Convolutional Networks' by Gao Huang et al., DenseNet-201 leverages dense connections between layers to improve information flow and gradient propagation, enabling the training of very deep networks with enhanced accuracy and efficiency.",
+  "keywords": "image classification, deep learning, DenseNet-201, densely connected networks, computer vision",
+  "author": "David Kim",
+  "input_type": "images",
+  "category": "classification",
+  "input_data": "https://www.image-net.org/",
+  "output_data": "https://modelcommons.icicle.edu/models/densenet201",
+  "ai_model": {
+    "name": "DenseNet-201",
+    "version": "1.0",
+    "description": "A densely connected convolutional neural network model designed for high-accuracy image classification.",
+    "owner": "Gao Huang et al.",
+    "location": "https://github.com/pytorch/vision/blob/main/torchvision/models/densenet.py",
+    "license": "BSD 3-Clause License",
+    "framework": "PyTorch",
+    "model_type": "convolutional neural network",
+    "test_accuracy": 0.771,
+    "foundational_model": "",
+    "model_structure": "",
+    "metrics": {
+      "Precision": 0.770,
+      "Recall": 0.771,
+      "Backbone": "DenseNet-201",
+      "Learning_Rate": 0.01,
+      "Batch_Size": 32,
+      "Input Shape": "(3, 224, 224)"
+    }
+  },
+  "bias_analysis": {},
+  "xai_analysis": {}
+}

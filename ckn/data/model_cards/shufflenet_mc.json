@@ -1,0 +1,35 @@
+{
+  "name": "ShuffleNet v2 for Image Classification",
+  "version": "2.0",
+  "short_description": "Efficient image classification using ShuffleNet v2.",
+  "full_description": "ShuffleNet v2 is a lightweight convolutional neural network architecture optimized for mobile and embedded devices. It builds upon the original ShuffleNet by improving the network architecture for better efficiency and accuracy, making it suitable for real-time image classification tasks with limited computational resources.",
+  "keywords": "image classification, deep learning, ShuffleNet v2, mobile networks, efficient neural networks",
+  "author": "Alice Johnson",
+  "input_type": "images",
+  "category": "classification",
+  "input_data": "https://github.com/pytorch/vision/tree/main/torchvision/datasets",
+  "output_data": "https://modelcommons.icicle.edu/models/shufflenetv2",
+  "ai_model": {
+    "name": "ShuffleNet v2",
+    "version": "2.0",
+    "description": "A lightweight convolutional neural network model designed for efficient image classification on mobile and embedded devices.",
+    "owner": "Megvii Inc.",
+    "location": "https://github.com/pytorch/vision/blob/main/torchvision/models/shufflenetv2.py",
+    "license": "BSD 3-Clause License",
+    "framework": "PyTorch",
+    "model_type": "convolutional neural network",
+    "test_accuracy": 0.720,
+    "foundational_model": "",
+    "model_structure": "",
+    "metrics": {
+      "Precision": 0.715,
+      "Recall": 0.720,
+      "Backbone": "ShuffleNet v2",
+      "Learning_Rate": 0.01,
+      "Batch_Size": 128,
+      "Input Shape": "(3, 224, 224)"
+    }
+  },
+  "bias_analysis": {},
+  "xai_analysis": {}
+}
