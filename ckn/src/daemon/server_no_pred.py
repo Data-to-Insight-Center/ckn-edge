@@ -147,14 +147,15 @@ def process_w_qoe(file, data):
     :param file:
     :return: {prediction, compute_time}
     """
+    start_time = time.time()
     filename = save_file(file)
 
-    start_time = time.time()
+    compute_start = time.time()
     # pre-processing the image
     preprocessed_input = pre_process(filename)
     # prediction on the pre-processed image
     prediction, probability = predict(preprocessed_input)
-    compute_time = time.time() - start_time
+    compute_time = time.time() - compute_start
 
     pub_timer = time.time()
     # processing the QoE values
