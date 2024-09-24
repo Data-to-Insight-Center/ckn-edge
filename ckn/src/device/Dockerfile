@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY rest_generator.py /app/
 COPY requirements.txt /app/
+COPY .env /app/
 COPY data /app/data
 
 RUN pip install -r /app/requirements.txt

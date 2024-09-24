@@ -4,13 +4,16 @@ import csv
 import numpy as np
 import os
 import time
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 """
 This generates the REST requests along with the images to be sent to the EDGE REST interfaces. 
 """
 
-URL = "http://localhost:8080/predict"
-# URL = "http://10.20.27.186:8080/predict"
-SIGNAL_URL = "http://localhost:8080/changetimestep"
+SERVER_ADDRESS = os.getenv("SERVER_ADDRESS")
+URL = f"{SERVER_ADDRESS}/predict"
+SIGNAL_URL = f"{SERVER_ADDRESS}/changetimestep"
 DEVICE_NAME = "raspi-3"
 DATA_FILE = 'data/1_min_window_low_delay_high_rps.csv'
 IMAGE_DIRECTORY = './data/images'
@@ -99,6 +102,12 @@ def send_request(filename, file_location, payload):
     ]
     headers = {}
 
+    # if 'cat' in filename, ground_truth = 'cat', if dog in filename, ground_truth = 'dog'
+    ground_truth = 'cat' if 'cat' in filename else 'dog'
+
+    # add ground truth to the payload
+    payload['ground_truth'] = ground_truth
+
     response = requests.request("POST", URL, headers=headers, data=payload, files=files)
     total_time = datetime.datetime.now().microsecond/1000 - start_time
 
@@ -180,13 +189,14 @@ def main():
             # send each request along wih an image from the IMAGENET data
             for k in range(json_requests.shape[0]):
                 response, r_time = send_request(images_raspi_1[k], image_paths[k], json_requests[k])
+                break
 
             print("Signaling split end after {} requests!".format(len(split_data[split_idx])))
             signal_split_end()
             time.sleep(5)
             total_splits += 1
 
-            if total_splits == 3:
+            if total_splits == 10:
                 print("{0} rounds sent!".format(i + 1))
                 break
         # print(response.text)
