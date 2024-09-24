@@ -161,7 +161,7 @@ def process_w_qoe(file, data):
     req_delay = float(data['delay'])
     ground_truth = data['ground_truth']
 
-    if ground_truth == prediction:
+    if ground_truth in {"cat", "dog"} and ground_truth == prediction:
         accuracy = 1
     else:
         accuracy = 0
@@ -179,6 +179,7 @@ def process_w_qoe(file, data):
 
     qoe_event['timestamp'] = timestamp
     qoe_event['accuracy'] = accuracy
+    qoe_event['ground_truth'] = ground_truth
 
     pub_time = time.time() - pub_timer
 
@@ -208,7 +209,7 @@ def send_summary_event(data, qoe, compute_time, probability, prediction, acc_qoe
 
 def write_csv_file(data, filename):
     csv_columns = ['server_id', 'service_id', 'client_id', 'prediction', 'compute_time', 'pred_accuracy', 'total_qoe',
-                   'accuracy_qoe', 'delay_qoe', 'req_acc', 'req_delay', 'model', 'added_time', 'timestamp', 'accuracy']
+                   'accuracy_qoe', 'delay_qoe', 'req_acc', 'req_delay', 'model', 'added_time', 'timestamp', 'accuracy', 'ground_truth']
     with open(filename, "a") as file:
         csvwriter = csv.DictWriter(file, csv_columns)
         # csvwriter.writeheader()

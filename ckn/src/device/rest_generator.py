@@ -86,15 +86,6 @@ def get_json_requests(dataset):
 
 
 def send_request(filename, file_location, payload):
-    """
-    Generates the POST request for the given set of parameters and sends it
-    Args:
-        filename:
-        file_location:
-
-    Returns:
-
-    """
     start_time = datetime.datetime.now().microsecond/1000
     files = [
         ('file',
@@ -115,15 +106,6 @@ def send_request(filename, file_location, payload):
 
 
 def signal_split_end():
-    """
-    Generates the POST request for the given set of parameters and sends it
-    Args:
-        filename:
-        file_location:
-
-    Returns:
-
-    """
     headers = {}
 
     response = requests.request("GET", SIGNAL_URL, headers=headers)
@@ -165,19 +147,7 @@ def main():
 
     # get the input images
     images_raspi_1, image_paths = get_images_in_order(IMAGE_DIRECTORY, DEVICE_NAME)
-
-    TOTAL_REQUESTS = 250000
-    DISTINCT_IMAGES = 2000
-    # max_iterations = int(TOTAL_REQUESTS/DISTINCT_IMAGES)
     max_iterations = 1
-
-    # for i in range(max_iterations):
-    #     for img_index in range(DISTINCT_IMAGES):
-    #         request_index = DISTINCT_IMAGES*i + img_index
-    #         response, time = send_request(images_raspi_1[img_index], image_paths[img_index], json_requests[request_index])
-    #     print("{0} requests sent!".format(request_index + 1))
-    #     print(response.text)
-    #     # print("Total time: {}ms".format(round(time, 2)))
 
     for i in range(max_iterations):
         total_splits = 0
@@ -199,9 +169,6 @@ def main():
             if total_splits == 20:
                 print("{0} rounds sent!".format(i + 1))
                 break
-        # print(response.text)
-        # print("Total time: {}ms".format(round(time, 2)))
-
 
 if __name__ == "__main__":
     main()
