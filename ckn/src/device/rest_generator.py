@@ -196,7 +196,7 @@ def main():
             time.sleep(5)
             total_splits += 1
 
-            if total_splits == 10:
+            if total_splits == 20:
                 print("{0} rounds sent!".format(i + 1))
                 break
         # print(response.text)
