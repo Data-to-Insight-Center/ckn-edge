@@ -1,1 +1,0 @@
-server_id,service_id,client_id,ground_truth,req_delay,req_acc,prediction,compute_time,probability,accuracy,total_qoe,accuracy_qoe,delay_qoe,cpu_power,model,start_time,end_time
